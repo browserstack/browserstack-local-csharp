@@ -174,6 +174,7 @@ namespace BrowserStack
 
       Thread th = new Thread(ths);
       th.Start();
+      th.Join();
 
       AppDomain.CurrentDomain.ProcessExit += new EventHandler((s, e) => Kill());
     }

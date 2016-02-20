@@ -1,6 +1,8 @@
 ﻿using System;
 using BrowserStack;
 using System.Collections.Generic;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Remote;
 
 namespace BrowserStackExample
 {
@@ -28,7 +30,27 @@ namespace BrowserStackExample
       Console.WriteLine("Is Running " + local.isRunning());
       local.start(options);
       Console.WriteLine("Is Running " + local.isRunning());
-      Console.ReadLine();
+      //Console.ReadLine();
+      IWebDriver driver;
+      DesiredCapabilities capability = DesiredCapabilities.Firefox();
+      capability.SetCapability("browserstack.user", "harishved2");
+      capability.SetCapability("browserstack.key", "sUiJatw6NhJZpsttcY35");
+      capability.SetCapability("browserstack.localIdentifier", "qwe");
+      capability.SetCapability("browserstack.local", true);
+      capability.SetCapability("build", "build");
+
+      driver = new RemoteWebDriver(
+        new Uri("http://hub.browserstack.com/wd/hub/"), capability
+      );
+      driver.Navigate().GoToUrl("http://www.google.com");
+      Console.WriteLine(driver.Title);
+
+      IWebElement query = driver.FindElement(By.Name("q"));
+      query.SendKeys("Browserstack");
+      query.Submit();
+      Console.WriteLine(driver.Title);
+
+      driver.Quit();
       Console.WriteLine("Is Running " + local.isRunning());
       local.stop();
       Console.WriteLine("Is Running " + local.isRunning());

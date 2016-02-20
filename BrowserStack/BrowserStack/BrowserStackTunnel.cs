@@ -4,9 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Net;
-using System.IO.Compression;
 
 namespace BrowserStack
 {
@@ -22,15 +20,11 @@ namespace BrowserStack
     string binaryAbsolute = "";
     string binaryArguments = "";
 
-    int lastPid = 0;
     StringBuilder output;
     public LocalState localState;
 
-    string lastError;
-
-    List<Process> processes = new List<Process>();
-    List<Job> jobs = new List<Job>();
-    private Action<LocalState> callbackFunction = null;
+    Job job = null;
+    Process process = null;
 
     private static Dictionary<LocalState, Regex> stateMatchers = new Dictionary<LocalState, Regex>() {
       { LocalState.Connected, new Regex(@"Press Ctrl-C to exit.*", RegexOptions.Multiline) },
@@ -73,19 +67,27 @@ namespace BrowserStack
       }
     }
 
-    public void Run(Action<LocalState> callOnStateChange)
+    public void Run()
     {
-      this.callbackFunction = callOnStateChange;
       if (!File.Exists(binaryAbsolute))
       {
         Console.WriteLine("BrowserStackLocal binary was not found.");
         downloadBinary();
       }
 
-      if (lastPid > 0)
-        KillByPid(lastPid);
+      if (this.process != null)
+      {
+        this.process.Refresh();
+        if (!this.process.HasExited)
+        {
+          try
+          {
+            this.process.Kill();
+          } catch (Exception) { }
+        }
+      }
 
-      if(this.verbose == true)
+      if (this.verbose == true)
       {
         Console.WriteLine("Local Started with Arguments: " + binaryArguments.Remove(0, 20));
       }
@@ -101,7 +103,7 @@ namespace BrowserStack
         UseShellExecute = false
       };
 
-      Process process = new Process();
+      process = new Process();
       process.StartInfo = processStartInfo;
       process.EnableRaisingEvents = true;
       DataReceivedEventHandler o = new DataReceivedEventHandler((s, e) =>
@@ -109,7 +111,7 @@ namespace BrowserStack
         if (e.Data != null)
         {
           output.Append(e.Data);
-          if(this.verbose == true)
+          if (this.verbose == true)
           {
             Console.WriteLine("BinaryOutput: " + e.Data);
           }
@@ -119,15 +121,12 @@ namespace BrowserStack
             Match m = kv.Value.Match(e.Data);
             if (m.Success)
             {
-              if (kv.Key == LocalState.Error && m.Groups.Count > 1 && m.Groups[1].Captures.Count > 0)
-                lastError = m.Groups[1].Captures[0].Value;
-
               if (localState != kv.Key)
                 TunnelStateChanged(localState, kv.Key);
 
               localState = kv.Key;
               output.Clear();
-              if(this.verbose == true)
+              if (this.verbose == true)
               {
                 Console.WriteLine("TunnelState: " + localState.ToString());
               }
@@ -137,59 +136,30 @@ namespace BrowserStack
         }
       });
 
-      process.OutputDataReceived += o;
-      process.ErrorDataReceived += o;
-      process.Exited += ((s, e) =>
+      this.process.OutputDataReceived += o;
+      this.process.ErrorDataReceived += o;
+      this.process.Exited += ((s, e) =>
       {
-        if (lastPid == process.Id)
-        {
-          lastPid = -1;
-        }
-
         Kill();
-        processes.Remove(process);
+        this.process = null;
       });
 
-      ThreadStart ths = new ThreadStart(() =>
-      {
-        process.Start();
-        processes.Add(process);
+      this.process.Start();
+      
+      this.job = new Job();
+      this.job.AddProcess(process.Handle);
+      
+      process.BeginOutputReadLine();
+      process.BeginErrorReadLine();
 
-        lastPid = process.Id;
-
-        Job job = new Job();
-        job.AddProcess(process.Handle);
-        jobs.Add(job);
-
-        process.BeginOutputReadLine();
-        process.BeginErrorReadLine();
-
-        // process.WaitForExit();
-        // process.CancelOutputRead();
-        // process.CancelErrorRead();
-      });
-
-      lastError = null;
       TunnelStateChanged(LocalState.Idle, LocalState.Connecting);
-
-      Thread th = new Thread(ths);
-      th.Start();
-      th.Join();
 
       AppDomain.CurrentDomain.ProcessExit += new EventHandler((s, e) => Kill());
     }
 
     private void TunnelStateChanged(LocalState prevState, LocalState state)
     {
-      if(this.callbackFunction != null)
-      {
-        this.callbackFunction(state);
-      }
-    }
-
-    public bool IsConnected()
-    {
-      return (localState == LocalState.Connected);
+      Console.WriteLine("Console state " + state);
     }
 
     public bool IsConnectedOrConnecting()
@@ -197,34 +167,14 @@ namespace BrowserStack
       return (localState == LocalState.Connected || localState == LocalState.Connecting);
     }
 
-    public string getLastError()
-    {
-      return lastError;
-    }
-
-    public void Destroy()
-    {
-      Kill();
-    }
-
     public void Kill()
     {
       try
       {
-        foreach (Process p in processes)
-        {
-          if (!p.HasExited)
-            p.Kill();
-        }
-
-        processes.Clear();
-
-        foreach (Job j in jobs)
-        {
-          j.Close();
-        }
-
-        jobs.Clear();
+        this.process.Kill();
+        this.process = null;
+        this.job.Close();
+        this.job = null;
       }
       catch (Exception e)
       {
@@ -237,22 +187,6 @@ namespace BrowserStack
 
         localState = LocalState.Disconnected;
         Console.WriteLine("TunnelState: " + localState.ToString());
-      }
-    }
-
-    public static void KillByPid(int pid)
-    {
-      try
-      {
-        Process p = Process.GetProcessById(pid);
-        if (p != null && !p.HasExited)
-        {
-          Console.WriteLine("Killing process with pid {0} {1}", p.Id, p.MainWindowTitle);
-          p.Kill();
-        }
-      }
-      catch (Exception)
-      {
       }
     }
 

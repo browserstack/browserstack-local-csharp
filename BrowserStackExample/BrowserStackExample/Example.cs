@@ -8,19 +8,15 @@ namespace BrowserStackExample
 {
   class Example
   {
-    static void runOnConnected(LocalState state)
-    {
-      Console.WriteLine("State Changed - " + state);
-    }
     static void Main(string[] args)
     {
-      Local local = new Local(runOnConnected);
+      Local local = new Local();
       Console.WriteLine("Is Running " + local.isRunning());
       local.verboseMode();
       Console.WriteLine("Is Running " + local.isRunning());
 
       List<KeyValuePair<string, string>> options = new List<KeyValuePair<string, string>>() {
-        new KeyValuePair<string, string>("key", "sUiJatw6NhJZpsttcY35"),
+        new KeyValuePair<string, string>("key", BROWSERSTACK_ACCESS_KEY),
         new KeyValuePair<string, string>("localIdentifier", "qwe"),
         new KeyValuePair<string, string>("qwe", "asd"),
         new KeyValuePair<string, string>("onlyAutomate", "true"),
@@ -30,11 +26,12 @@ namespace BrowserStackExample
       Console.WriteLine("Is Running " + local.isRunning());
       local.start(options);
       Console.WriteLine("Is Running " + local.isRunning());
-      //Console.ReadLine();
+
+      // Run WebDriver Tests
       IWebDriver driver;
       DesiredCapabilities capability = DesiredCapabilities.Firefox();
-      capability.SetCapability("browserstack.user", "harishved2");
-      capability.SetCapability("browserstack.key", "sUiJatw6NhJZpsttcY35");
+      capability.SetCapability("browserstack.user", BROWSERSTACK_USERNAME);
+      capability.SetCapability("browserstack.key", BROWSERSTACK_ACCESS_KEY);
       capability.SetCapability("browserstack.localIdentifier", "qwe");
       capability.SetCapability("browserstack.local", true);
       capability.SetCapability("build", "build");

@@ -14,8 +14,6 @@ namespace BrowserStack
     private BrowserStackTunnel local = null;
     private static KeyValuePair<string, string> emptyStringPair = new KeyValuePair<string, string>();
 
-    private Action<LocalState> stateChangeCallback = null;
-
     private static List<KeyValuePair<string, string>> valueCommands = new List<KeyValuePair<string, string>>() {
       new KeyValuePair<string, string>("localidentifier", "-localIdentifier"),
       new KeyValuePair<string, string>("hosts", ""),
@@ -30,24 +28,11 @@ namespace BrowserStack
       new KeyValuePair<string, string>("forcelocal", "-forcelocal"),
       new KeyValuePair<string, string>("onlyautomate", "-onlyAutomate"),
     };
-    private void callOnStateChange(LocalState state)
-    {
-      Console.WriteLine("Current State " + state);
-      if (stateChangeCallback != null)
-      {
-        stateChangeCallback(state);
-      }
-    }
-    
+
     public bool isRunning()
     {
       if (this.local == null) return false;
-      return (this.local.localState == LocalState.Connected);
-    }
-
-    public Local(Action<LocalState> stateChangeCallback)
-    {
-      this.stateChangeCallback = stateChangeCallback;
+      return this.local.IsConnectedOrConnecting();
     }
 
     private void addArgs(string key, string value)
@@ -109,7 +94,7 @@ namespace BrowserStack
       {
         this.local.logVerbose();
       }
-      this.local.Run(callOnStateChange);
+      this.local.Run();
     }
 
     public void stop()

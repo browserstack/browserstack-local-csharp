@@ -12,9 +12,7 @@ namespace BrowserStackExample
     {
       Local local = new Local();
       Console.WriteLine("Is Running " + local.isRunning());
-      local.verboseMode();
-      Console.WriteLine("Is Running " + local.isRunning());
-
+      
       List<KeyValuePair<string, string>> options = new List<KeyValuePair<string, string>>() {
         new KeyValuePair<string, string>("key", BROWSERSTACK_ACCESS_KEY),
         new KeyValuePair<string, string>("localIdentifier", "qwe"),
@@ -22,7 +20,7 @@ namespace BrowserStackExample
         new KeyValuePair<string, string>("onlyAutomate", "true"),
         new KeyValuePair<string, string>("verbose", "true"),
         new KeyValuePair<string, string>("forceLocal", "true"),
-        new KeyValuePair<string, string>("path", "C:\\Users\\Admin\\Desktop\\"),
+        //new KeyValuePair<string, string>("path", "C:\\Users\\Admin\\Desktop\\"),
       };
       Console.WriteLine("Is Running " + local.isRunning());
       local.start(options);

@@ -17,12 +17,11 @@ namespace BrowserStack
   {
     private Hierarchy hierarchy;
     private string accessKey = "";
-    private bool logVerbose = false;
     private string defaultDirectoryPath = null;
     private string argumentString = "";
     private PatternLayout patternLayout;
     private BrowserStackTunnel local = null;
-    public static ILog logger = LogManager.GetLogger("log4net");
+    public static ILog logger = LogManager.GetLogger("Local");
     public static ILog binaryLogger = LogManager.GetLogger("Binary Output");
     private static KeyValuePair<string, string> emptyStringPair = new KeyValuePair<string, string>();
 
@@ -89,6 +88,13 @@ namespace BrowserStack
       consoleAppender.Threshold = Level.Info;
       consoleAppender.Layout = patternLayout;
       consoleAppender.ActivateOptions();
+
+      LoggerMatchFilter loggerMatchFilter = new LoggerMatchFilter();
+      loggerMatchFilter.LoggerToMatch = "Local";
+      loggerMatchFilter.AcceptOnMatch = true;
+      consoleAppender.AddFilter(loggerMatchFilter);
+      consoleAppender.AddFilter(new DenyAllFilter());
+
       hierarchy.Root.AddAppender(consoleAppender);
 
       hierarchy.Root.Level = Level.All;
@@ -96,6 +102,7 @@ namespace BrowserStack
     }
     private void setupFileLogger(string filePath)
     {
+      logger.Info("Logging Binary Output to - " + filePath);
       RollingFileAppender roller = new RollingFileAppender();
       roller.AppendToFile = true;
       roller.File = filePath;
@@ -120,11 +127,6 @@ namespace BrowserStack
     {
       setupLogging();
     }
-    public void verboseMode()
-    {
-      this.logVerbose = true;
-    }
-
     public void start(List<KeyValuePair<string, string>> options)
     {
       foreach (KeyValuePair<string, string> pair in options)
@@ -148,10 +150,6 @@ namespace BrowserStack
 
       setupFileLogger(Path.Combine(this.defaultDirectoryPath, "local.log"));
       this.local = new BrowserStackTunnel(defaultDirectoryPath, accessKey + " " + argumentString);
-      if (this.logVerbose == true)
-      {
-        this.local.logVerbose();
-      }
       this.local.Run();
     }
 

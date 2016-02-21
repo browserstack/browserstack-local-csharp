@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace BrowserStack
@@ -71,11 +70,6 @@ namespace BrowserStack
       return AssignProcessToJobObject(handle, processHandle);
     }
 
-    public bool AddProcess(int processId)
-    {
-      return AddProcess(Process.GetProcessById(processId).Handle);
-    }
-
   }
 
   #region Helper classes
@@ -104,14 +98,6 @@ namespace BrowserStack
     public UIntPtr Affinity;
     public UInt32 PriorityClass;
     public UInt32 SchedulingClass;
-  }
-
-  [StructLayout(LayoutKind.Sequential)]
-  public struct SECURITY_ATTRIBUTES
-  {
-    public UInt32 nLength;
-    public IntPtr lpSecurityDescriptor;
-    public Int32 bInheritHandle;
   }
 
   [StructLayout(LayoutKind.Sequential)]

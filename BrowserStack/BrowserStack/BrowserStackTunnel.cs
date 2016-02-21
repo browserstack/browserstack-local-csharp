@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Net;
+using log4net;
 
 namespace BrowserStack
 {
@@ -61,9 +62,9 @@ namespace BrowserStack
 
       using (var client = new WebClient())
       {
-        Console.WriteLine("Downloading BrowserStackLocal..");
+        Local.logger.Info("Downloading BrowserStackLocal..");
         client.DownloadFile(downloadURL, this.binaryAbsolute);
-        Console.WriteLine("Binary Downloaded.");
+        Local.logger.Info("Binary Downloaded.");
       }
     }
 
@@ -71,7 +72,7 @@ namespace BrowserStack
     {
       if (!File.Exists(binaryAbsolute))
       {
-        Console.WriteLine("BrowserStackLocal binary was not found.");
+        Local.logger.Warn("BrowserStackLocal binary was not found.");
         downloadBinary();
       }
 
@@ -89,7 +90,7 @@ namespace BrowserStack
 
       if (this.verbose == true)
       {
-        Console.WriteLine("Local Started with Arguments: " + binaryArguments.Remove(0, 20));
+        Local.logger.Info("Local Started with Arguments: " + binaryArguments.Remove(0, 20));
       }
       ProcessStartInfo processStartInfo = new ProcessStartInfo()
       {
@@ -113,7 +114,7 @@ namespace BrowserStack
           output.Append(e.Data);
           if (this.verbose == true)
           {
-            Console.WriteLine("BinaryOutput: " + e.Data);
+            Local.binaryLogger.Info(e.Data);
           }
 
           foreach (KeyValuePair<LocalState, Regex> kv in stateMatchers)
@@ -128,7 +129,7 @@ namespace BrowserStack
               output.Clear();
               if (this.verbose == true)
               {
-                Console.WriteLine("TunnelState: " + localState.ToString());
+                Local.logger.Info("TunnelState: " + localState.ToString());
               }
               break;
             }
@@ -159,7 +160,7 @@ namespace BrowserStack
 
     private void TunnelStateChanged(LocalState prevState, LocalState state)
     {
-      Console.WriteLine("Console state " + state);
+      Local.logger.Info("Current tunnel state " + state);
     }
 
     public bool IsConnectedOrConnecting()
@@ -178,7 +179,7 @@ namespace BrowserStack
       }
       catch (Exception e)
       {
-        Console.WriteLine("Error killing: " + e.Message);
+        Local.logger.Error("Error killing: " + e.Message);
       }
       finally
       {
@@ -186,7 +187,7 @@ namespace BrowserStack
           TunnelStateChanged(localState, LocalState.Disconnected);
 
         localState = LocalState.Disconnected;
-        Console.WriteLine("TunnelState: " + localState.ToString());
+        Local.logger.Info("TunnelState: " + localState.ToString());
       }
     }
 

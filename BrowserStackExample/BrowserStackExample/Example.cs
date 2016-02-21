@@ -20,6 +20,7 @@ namespace BrowserStackExample
         new KeyValuePair<string, string>("localIdentifier", "qwe"),
         new KeyValuePair<string, string>("qwe", "asd"),
         new KeyValuePair<string, string>("onlyAutomate", "true"),
+        new KeyValuePair<string, string>("verbose", "true"),
         new KeyValuePair<string, string>("forceLocal", "true"),
         new KeyValuePair<string, string>("path", "C:\\Users\\Admin\\Desktop\\"),
       };

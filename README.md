@@ -35,11 +35,6 @@ You will need to resolve the references from the `Solution Explorer`. `Visual St
 * `logfile`: Path to file where Local logs be saved to
 * `binaryPath`: Optional path to Local binary
 
-
-## Tests
-
-To run the JUnit tests, select the `All Tests` options from `Test` tab.
-
 ## Example
 
 To run the example,

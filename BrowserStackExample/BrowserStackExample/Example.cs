@@ -20,8 +20,8 @@ namespace BrowserStackExample
         new KeyValuePair<string, string>("qwe", "asd"),
         new KeyValuePair<string, string>("onlyAutomate", "true"),
         new KeyValuePair<string, string>("verbose", "true"),
-        new KeyValuePair<string, string>("forceLocal", "true"),
-        new KeyValuePair<string, string>("binaryPath", "C:\\Users\\Admin\\Desktop\\BrowserStackLocal.exe"),
+        new KeyValuePair<string, string>("forcelocal", "true"),
+        new KeyValuePair<string, string>("binarypath", "C:\\Users\\Admin\\Desktop\\BrowserStackLocal.exe"),
         new KeyValuePair<string, string>("logFile", "C:\\Users\\Admin\\Desktop\\local.log"),
       };
       Console.WriteLine("Is Running " + local.isRunning());

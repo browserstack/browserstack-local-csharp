@@ -33,7 +33,7 @@ You will need to resolve the references from the `Solution Explorer`. `Visual St
 * `localIdentifier`: If doing simultaneous multiple local testing connections, set this uniquely for different processes
 * `hosts`: List of hosts and ports where Local must be enabled for eg. localhost,3000,1,localhost,3001,0
 * `logfile`: Path to file where Local logs be saved to
-* `binaryPath`: Optional path to Local binary
+* `binarypath`: Optional path to Local binary
 
 ## Example
 

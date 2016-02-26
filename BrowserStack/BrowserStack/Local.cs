@@ -26,19 +26,19 @@ namespace BrowserStack
     private static KeyValuePair<string, string> emptyStringPair = new KeyValuePair<string, string>();
 
     private static List<KeyValuePair<string, string>> valueCommands = new List<KeyValuePair<string, string>>() {
-      new KeyValuePair<string, string>("localidentifier", "-localIdentifier"),
+      new KeyValuePair<string, string>("localIdentifier", "-localIdentifier"),
       new KeyValuePair<string, string>("hosts", ""),
-      new KeyValuePair<string, string>("proxyhost", "-proxyHost"),
-      new KeyValuePair<string, string>("proxyport", "-proxyPort"),
-      new KeyValuePair<string, string>("proxyuser", "-proxyUser"),
-      new KeyValuePair<string, string>("proxypass", "-proxyPass"),
+      new KeyValuePair<string, string>("proxyHost", "-proxyHost"),
+      new KeyValuePair<string, string>("proxyPort", "-proxyPort"),
+      new KeyValuePair<string, string>("proxyUser", "-proxyUser"),
+      new KeyValuePair<string, string>("proxyPass", "-proxyPass"),
     };
 
     private static List<KeyValuePair<string, string>> booleanCommands = new List<KeyValuePair<string, string>>() {
-      new KeyValuePair<string, string>("verbose", "-vvv"),
+      new KeyValuePair<string, string>("v", "-vvv"),
       new KeyValuePair<string, string>("force", "-force"),
       new KeyValuePair<string, string>("forcelocal", "-forcelocal"),
-      new KeyValuePair<string, string>("onlyautomate", "-onlyAutomate"),
+      new KeyValuePair<string, string>("onlyAutomate", "-onlyAutomate"),
     };
     private readonly string LOG4NET_CONFIG_FILE_PATH = Path.Combine(Directory.GetCurrentDirectory(), "log_config.xml");
 

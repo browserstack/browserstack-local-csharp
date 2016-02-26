@@ -16,6 +16,7 @@ namespace BrowserStackExample
       List<KeyValuePair<string, string>> options = new List<KeyValuePair<string, string>>() {
         new KeyValuePair<string, string>("key", BROWSERSTACK_ACCESS_KEY),
         new KeyValuePair<string, string>("localIdentifier", "qwe"),
+        //new KeyValuePair<string, string>("f", "C:\\Users\\Admin\\Desktop\\"),
         new KeyValuePair<string, string>("qwe", "asd"),
         new KeyValuePair<string, string>("onlyAutomate", "true"),
         new KeyValuePair<string, string>("verbose", "true"),

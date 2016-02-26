@@ -20,7 +20,7 @@ namespace BrowserStack
     static readonly string zipName = "BrowserStackLocal.zip";
     static readonly string binaryName = "BrowserStackLocal.exe";
     static readonly string downloadURL = "https://www.browserstack.com/browserstack-local/BrowserStackLocal-win32.zip";
-    static readonly string[] basePaths = new string[] {
+    public static readonly string[] basePaths = new string[] {
       Path.Combine(Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%"), ".browserstack"),
       Directory.GetCurrentDirectory(),
       Path.GetTempPath() };
@@ -134,9 +134,17 @@ namespace BrowserStack
       Local.logger.Info("Binary Extracted");
     }
 
-    public void Run(string accessKey)
+    public void Run(string accessKey, string folder)
     {
-      string arguments = accessKey + " " + binaryArguments;
+      string arguments = "";
+      if (folder != null && folder.Trim().Length != 0)
+      {
+        arguments = "-f " + accessKey + " " + folder + " " + binaryArguments;
+      }
+      else
+      {
+        arguments = accessKey + " " + binaryArguments;
+      }
       if (!File.Exists(binaryAbsolute))
       {
         Local.logger.Warn("BrowserStackLocal binary was not found at " + binaryAbsolute);

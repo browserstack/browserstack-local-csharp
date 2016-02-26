@@ -14,7 +14,9 @@ namespace BrowserStack
   public class Local
   {
     private Hierarchy hierarchy;
+    private string folder = "";
     private string accessKey = "";
+    private string customLogPath = "";
     private string argumentString = "";
     private string customBinaryPath = "";
     private PatternLayout patternLayout;
@@ -34,6 +36,7 @@ namespace BrowserStack
 
     private static List<KeyValuePair<string, string>> booleanCommands = new List<KeyValuePair<string, string>>() {
       new KeyValuePair<string, string>("verbose", "-vvv"),
+      new KeyValuePair<string, string>("force", "-force"),
       new KeyValuePair<string, string>("forcelocal", "-forcelocal"),
       new KeyValuePair<string, string>("onlyautomate", "-onlyAutomate"),
     };
@@ -54,23 +57,33 @@ namespace BrowserStack
       {
         accessKey = value;
       }
-      if (key.Equals("binarypath"))
+      else if (key.Equals("f"))
+      {
+        folder = value;
+      }
+      else if (key.Equals("binarypath"))
       {
         customBinaryPath = value;
       }
-
-      result = valueCommands.Find(pair => pair.Key == key);
-      if (!result.Equals(emptyStringPair))
+      else if (key.Equals("logfile"))
       {
-        argumentString += result.Value + " " + value + " ";
+        customLogPath = value;
       }
-
-      result = booleanCommands.Find(pair => pair.Key == key);
-      if (!result.Equals(emptyStringPair))
+      else
       {
-        if (value.Trim().ToLower() == "true")
+        result = valueCommands.Find(pair => pair.Key == key);
+        if (!result.Equals(emptyStringPair))
         {
-          argumentString += result.Value + " ";
+          argumentString += result.Value + " " + value + " ";
+        }
+
+        result = booleanCommands.Find(pair => pair.Key == key);
+        if (!result.Equals(emptyStringPair))
+        {
+          if (value.Trim().ToLower() == "true")
+          {
+            argumentString += result.Value + " ";
+          }
         }
       }
     }
@@ -144,12 +157,18 @@ namespace BrowserStack
         Regex.Replace(this.accessKey, @"\s+", "");
       }
 
-      setupFileLogger(Path.Combine(customBinaryPath, "local.log"));
+      if (customLogPath == null || customLogPath.Trim().Length == 0)
+      {
+        customLogPath = Path.Combine(BrowserStackTunnel.basePaths[1], "local.log");
+      }
+
+      setupFileLogger(customLogPath);
+      argumentString += "-logFile " + customLogPath;
       tunnel = new BrowserStackTunnel(customBinaryPath, argumentString);
       while (true) {
         bool except = false;
         try {
-          tunnel.Run(accessKey);
+          tunnel.Run(accessKey, folder);
         } catch (Exception)
         {
           logger.Warn("Running Local failed. Falling back to backup path.");

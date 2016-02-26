@@ -1,6 +1,5 @@
 using log4net;
 using log4net.Appender;
-using log4net.Config;
 using log4net.Core;
 using log4net.Filter;
 using log4net.Layout;
@@ -8,7 +7,6 @@ using log4net.Repository.Hierarchy;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace BrowserStack
@@ -17,10 +15,10 @@ namespace BrowserStack
   {
     private Hierarchy hierarchy;
     private string accessKey = "";
-    private string defaultDirectoryPath = null;
     private string argumentString = "";
+    private string customBinaryPath = "";
     private PatternLayout patternLayout;
-    private BrowserStackTunnel local = null;
+    private BrowserStackTunnel tunnel = null;
     public static ILog logger = LogManager.GetLogger("Local");
     public static ILog binaryLogger = LogManager.GetLogger("Binary Output");
     private static KeyValuePair<string, string> emptyStringPair = new KeyValuePair<string, string>();
@@ -43,8 +41,8 @@ namespace BrowserStack
 
     public bool isRunning()
     {
-      if (this.local == null) return false;
-      return this.local.IsConnectedOrConnecting();
+      if (tunnel == null) return false;
+      return tunnel.IsConnected();
     }
 
     private void addArgs(string key, string value)
@@ -54,17 +52,17 @@ namespace BrowserStack
 
       if (key.Equals("key"))
       {
-        this.accessKey = value;
+        accessKey = value;
       }
-      if (key.Equals("path"))
+      if (key.Equals("binarypath"))
       {
-        this.defaultDirectoryPath = value;
+        customBinaryPath = value;
       }
 
       result = valueCommands.Find(pair => pair.Key == key);
       if (!result.Equals(emptyStringPair))
       {
-        this.argumentString += result.Value + " " + value + " ";
+        argumentString += result.Value + " " + value + " ";
       }
 
       result = booleanCommands.Find(pair => pair.Key == key);
@@ -72,7 +70,7 @@ namespace BrowserStack
       {
         if (value.Trim().ToLower() == "true")
         {
-          this.argumentString += result.Value + " ";
+          argumentString += result.Value + " ";
         }
       }
     }
@@ -122,7 +120,6 @@ namespace BrowserStack
       roller.ActivateOptions();
       hierarchy.Root.AddAppender(roller);
     }
-
     public Local()
     {
       setupLogging();
@@ -136,28 +133,43 @@ namespace BrowserStack
         addArgs(key, value);
       }
 
-      if (this.defaultDirectoryPath == null || this.defaultDirectoryPath.Trim().Length == 0)
+      if (accessKey == null || accessKey.Trim().Length == 0)
       {
-        this.defaultDirectoryPath = Path.Combine(Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%"), ".browserstack");
-      }
-      (new FileInfo(this.defaultDirectoryPath)).Directory.Create();
-
-      if (this.accessKey == null || this.accessKey.Trim().Length == 0)
-      {
-        this.accessKey = Environment.GetEnvironmentVariable("BROWSERSTACK_ACCESS_KEY");
+        accessKey = Environment.GetEnvironmentVariable("BROWSERSTACK_ACCESS_KEY");
+        if (accessKey == null || accessKey.Trim().Length == 0)
+        {
+          throw new Exception("BROWSERSTACK_ACCESS_KEY cannot be empty. "+
+            "Specify one by adding key to options or adding to the environment variable BROWSERSTACK_KEY.");
+        }
         Regex.Replace(this.accessKey, @"\s+", "");
       }
 
-      setupFileLogger(Path.Combine(this.defaultDirectoryPath, "local.log"));
-      this.local = new BrowserStackTunnel(defaultDirectoryPath, accessKey + " " + argumentString);
-      this.local.Run();
+      setupFileLogger(Path.Combine(customBinaryPath, "local.log"));
+      tunnel = new BrowserStackTunnel(customBinaryPath, argumentString);
+      while (true) {
+        bool except = false;
+        try {
+          tunnel.Run(accessKey);
+        } catch (Exception)
+        {
+          logger.Warn("Running Local failed. Falling back to backup path.");
+          except = true;
+        }
+        if (except)
+        {
+          tunnel.fallbackPaths();
+        } else
+        {
+          break;
+        }
+      }
     }
 
     public void stop()
     {
-      if (this.local != null)
+      if (tunnel != null)
       {
-        this.local.Kill();
+        tunnel.Kill();
       }
     }
   }

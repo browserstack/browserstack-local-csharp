@@ -17,12 +17,15 @@ namespace BrowserStack
 
   internal class BrowserStackTunnel : IDisposable
   {
-    static string zipName = "BrowserStackLocal.zip";
-    static string binaryName = "BrowserStackLocal.exe";
-    static string downloadURL = "https://www.browserstack.com/browserstack-local/BrowserStackLocal-win32.zip";
-    
-    string basePath = "";
-    string zipAbsolute = "";
+    static readonly string zipName = "BrowserStackLocal.zip";
+    static readonly string binaryName = "BrowserStackLocal.exe";
+    static readonly string downloadURL = "https://www.browserstack.com/browserstack-local/BrowserStackLocal-win32.zip";
+    static readonly string[] basePaths = new string[] {
+      Path.Combine(Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%"), ".browserstack"),
+      Directory.GetCurrentDirectory(),
+      Path.GetTempPath() };
+
+    int basePathsIndex = -1;
     string binaryAbsolute = "";
     string binaryArguments = "";
     public AutoResetEvent connectingEvent = new AutoResetEvent(false);
@@ -40,42 +43,54 @@ namespace BrowserStack
 
     public BrowserStackTunnel(string binaryPath, string binaryArguments)
     {
-      if (binaryPath == null && binaryPath.Trim() == "")
+      if (binaryPath == null || binaryPath.Trim().Length == 0)
       {
-        throw new Exception("The required binary path cannot be empty.");
+        binaryPath = basePaths[++basePathsIndex];
       }
+      binaryAbsolute = binaryPath;
+
       if (binaryArguments == null)
       {
         binaryArguments = "";
       }
 
-      this.basePath = binaryPath;
-      this.zipAbsolute = Path.Combine(binaryPath, zipName);
-      this.binaryAbsolute = Path.Combine(binaryPath, binaryName);
+      binaryAbsolute = Path.Combine(binaryPath, binaryName);
 
-      this.localState = LocalState.Idle;
-      this.output = new StringBuilder();
+      localState = LocalState.Idle;
+      output = new StringBuilder();
       this.binaryArguments = binaryArguments;
     }
 
+    public void fallbackPaths()
+    {
+      if (basePathsIndex >= basePaths.Length - 1)
+      {
+        throw new Exception("No More Paths to try. Please specify a binary path in options.");
+      }
+      basePathsIndex++;
+      binaryAbsolute = Path.Combine(basePaths[basePathsIndex], binaryName);
+    }
     public void downloadBinary()
     {
-      Directory.CreateDirectory(this.basePath);
+      string binaryDirectory = Path.Combine(binaryAbsolute, "..");
+      string zipAbsolute = Path.Combine(binaryDirectory, zipName);
+
+      Directory.CreateDirectory(binaryDirectory);
 
       using (var client = new WebClient())
       {
         Local.logger.Info("Downloading BrowserStackLocal..");
-        client.DownloadFile(downloadURL, this.zipAbsolute);
+        client.DownloadFile(downloadURL, zipAbsolute);
         Local.logger.Info("Binary Downloaded.");
       }
 
-      if (!File.Exists(this.zipAbsolute))
+      if (!File.Exists(zipAbsolute))
       {
         Local.logger.Error("Error accessing downloaded zip. Please check file permissions.");
-        throw new Exception("Error accessing file " + this.zipAbsolute);
+        throw new Exception("Error accessing file " + zipAbsolute);
       }
 
-      using (ZipInputStream s = new ZipInputStream(File.OpenRead(this.zipAbsolute)))
+      using (ZipInputStream s = new ZipInputStream(File.OpenRead(zipAbsolute)))
       {
         ZipEntry theEntry;
         while ((theEntry = s.GetNextEntry()) != null)
@@ -88,7 +103,7 @@ namespace BrowserStack
           string fileName = Path.GetFileName(theEntry.Name);
           if (fileName != String.Empty)
           {
-            using (FileStream streamWriter = File.Create(this.binaryAbsolute))
+            using (FileStream streamWriter = File.Create(binaryAbsolute))
             {
               int size = 2048;
               byte[] data = new byte[2048];
@@ -110,39 +125,35 @@ namespace BrowserStack
         s.Close();
       }
 
-      DirectoryInfo dInfo = new DirectoryInfo(this.zipAbsolute);
+      DirectoryInfo dInfo = new DirectoryInfo(binaryAbsolute);
       DirectorySecurity dSecurity = dInfo.GetAccessControl();
       dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
       dInfo.SetAccessControl(dSecurity);
 
-      File.Delete(this.zipAbsolute);
+      File.Delete(zipAbsolute);
       Local.logger.Info("Binary Extracted");
     }
 
-    public void Run()
+    public void Run(string accessKey)
     {
+      string arguments = accessKey + " " + binaryArguments;
       if (!File.Exists(binaryAbsolute))
       {
-        Local.logger.Warn("BrowserStackLocal binary was not found.");
+        Local.logger.Warn("BrowserStackLocal binary was not found at " + binaryAbsolute);
         downloadBinary();
       }
 
-      if (this.process != null)
+      if (process != null)
       {
-        this.process.Refresh();
-        if (!this.process.HasExited)
-        {
-          try
-          {
-            this.process.Kill();
-          } catch (Exception) { }
-        }
+        process.Close();
       }
 
+      Local.logger.Info("BrowserStackLocal binary is located at " + binaryAbsolute);
+      Local.logger.Info("Starting Binary with arguments " + arguments.Replace(accessKey, "<access_key>"));
       ProcessStartInfo processStartInfo = new ProcessStartInfo()
       {
         FileName = binaryAbsolute,
-        Arguments = binaryArguments,
+        Arguments = arguments,
         CreateNoWindow = true,
         WindowStyle = ProcessWindowStyle.Hidden,
         RedirectStandardOutput = true,
@@ -178,18 +189,18 @@ namespace BrowserStack
         }
       });
 
-      this.process.OutputDataReceived += o;
-      this.process.ErrorDataReceived += o;
-      this.process.Exited += ((s, e) =>
+      process.OutputDataReceived += o;
+      process.ErrorDataReceived += o;
+      process.Exited += ((s, e) =>
       {
         Kill();
-        this.process = null;
+        process = null;
       });
 
-      this.process.Start();
+      process.Start();
       
-      this.job = new Job();
-      this.job.AddProcess(process.Handle);
+      job = new Job();
+      job.AddProcess(process.Handle);
       
       process.BeginOutputReadLine();
       process.BeginErrorReadLine();
@@ -210,9 +221,9 @@ namespace BrowserStack
       Local.logger.Info("Current tunnel state " + state);
     }
 
-    public bool IsConnectedOrConnecting()
+    public bool IsConnected()
     {
-      return (localState == LocalState.Connected || localState == LocalState.Connecting);
+      return (localState == LocalState.Connected);
     }
 
     public void Kill()

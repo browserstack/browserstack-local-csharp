@@ -20,7 +20,7 @@ namespace BrowserStackExample
         new KeyValuePair<string, string>("onlyAutomate", "true"),
         new KeyValuePair<string, string>("verbose", "true"),
         new KeyValuePair<string, string>("forceLocal", "true"),
-        //new KeyValuePair<string, string>("path", "C:\\Users\\Admin\\Desktop\\"),
+        new KeyValuePair<string, string>("binaryPath", "C:\\Users\\Admin\\Desktop\\"),
       };
       Console.WriteLine("Is Running " + local.isRunning());
       local.start(options);

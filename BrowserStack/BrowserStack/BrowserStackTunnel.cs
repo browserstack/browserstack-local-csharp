@@ -41,20 +41,18 @@ namespace BrowserStack
       { LocalState.Error, new Regex(@"\s*\*\*\* Error:\s+(.*).*", RegexOptions.Multiline) }
     };
 
-    public BrowserStackTunnel(string binaryPath, string binaryArguments)
+    public BrowserStackTunnel(string binaryAbsolute, string binaryArguments)
     {
-      if (binaryPath == null || binaryPath.Trim().Length == 0)
+      if (binaryAbsolute == null || binaryAbsolute.Trim().Length == 0)
       {
-        binaryPath = basePaths[++basePathsIndex];
+        binaryAbsolute = Path.Combine(basePaths[++basePathsIndex], binaryName);
       }
-      binaryAbsolute = binaryPath;
+      this.binaryAbsolute = binaryAbsolute;
 
       if (binaryArguments == null)
       {
         binaryArguments = "";
       }
-
-      binaryAbsolute = Path.Combine(binaryPath, binaryName);
 
       localState = LocalState.Idle;
       output = new StringBuilder();

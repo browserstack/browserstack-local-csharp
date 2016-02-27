@@ -163,7 +163,7 @@ namespace BrowserStack
       }
 
       setupFileLogger(customLogPath);
-      argumentString += "-logFile " + customLogPath;
+      // argumentString += "-logFile " + customLogPath;
       tunnel = new BrowserStackTunnel(customBinaryPath, argumentString);
       while (true) {
         bool except = false;

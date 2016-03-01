@@ -17,9 +17,8 @@ namespace BrowserStack
 
   internal class BrowserStackTunnel : IDisposable
   {
-    static readonly string zipName = "BrowserStackLocal.zip";
     static readonly string binaryName = "BrowserStackLocal.exe";
-    static readonly string downloadURL = "https://www.browserstack.com/browserstack-local/BrowserStackLocal-win32.zip";
+    static readonly string downloadURL = "https://s3.amazonaws.com/browserStack/browserstack-local/BrowserStackLocal.exe";
     public static readonly string[] basePaths = new string[] {
       Path.Combine(Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%"), ".browserstack"),
       Directory.GetCurrentDirectory(),
@@ -71,65 +70,27 @@ namespace BrowserStack
     public void downloadBinary()
     {
       string binaryDirectory = Path.Combine(binaryAbsolute, "..");
-      string zipAbsolute = Path.Combine(binaryDirectory, zipName);
+      string binaryAbsolute = Path.Combine(binaryDirectory, binaryName);
 
       Directory.CreateDirectory(binaryDirectory);
 
       using (var client = new WebClient())
       {
         Local.logger.Info("Downloading BrowserStackLocal..");
-        client.DownloadFile(downloadURL, zipAbsolute);
+        client.DownloadFile(downloadURL, binaryAbsolute);
         Local.logger.Info("Binary Downloaded.");
       }
 
-      if (!File.Exists(zipAbsolute))
+      if (!File.Exists(binaryAbsolute))
       {
         Local.logger.Error("Error accessing downloaded zip. Please check file permissions.");
-        throw new Exception("Error accessing file " + zipAbsolute);
-      }
-
-      using (ZipInputStream s = new ZipInputStream(File.OpenRead(zipAbsolute)))
-      {
-        ZipEntry theEntry;
-        while ((theEntry = s.GetNextEntry()) != null)
-        {
-          string directoryName = Path.GetDirectoryName(theEntry.Name);
-          if (directoryName.Length > 0)
-          {
-            Directory.CreateDirectory(directoryName);
-          }
-          string fileName = Path.GetFileName(theEntry.Name);
-          if (fileName != String.Empty)
-          {
-            using (FileStream streamWriter = File.Create(binaryAbsolute))
-            {
-              int size = 2048;
-              byte[] data = new byte[2048];
-              while (true)
-              {
-                size = s.Read(data, 0, data.Length);
-                if (size > 0)
-                {
-                  streamWriter.Write(data, 0, size);
-                }
-                else
-                {
-                  break;
-                }
-              }
-            }
-          }
-        }
-        s.Close();
+        throw new Exception("Error accessing file " + binaryAbsolute);
       }
 
       DirectoryInfo dInfo = new DirectoryInfo(binaryAbsolute);
       DirectorySecurity dSecurity = dInfo.GetAccessControl();
       dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
       dInfo.SetAccessControl(dSecurity);
-
-      File.Delete(zipAbsolute);
-      Local.logger.Info("Binary Extracted");
     }
 
     public void Run(string accessKey, string folder)

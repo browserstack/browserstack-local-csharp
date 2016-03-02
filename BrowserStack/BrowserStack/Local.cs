@@ -51,7 +51,7 @@ namespace BrowserStack
     private void addArgs(string key, string value)
     {
       KeyValuePair<string, string> result;
-      key = key.Trim().ToLower();
+      key = key.Trim();
 
       if (key.Equals("key"))
       {

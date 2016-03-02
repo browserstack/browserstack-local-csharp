@@ -1,5 +1,7 @@
 # browserstack-local-csharp
 
+[![Build Status](https://travis-ci.org/browserstack/browserstack-local-csharp.svg?branch=master)](https://travis-ci.org/browserstack/browserstack-local-csharp)
+
 ## Setup
 
 Open the solution file `BrowserStack/BrowserStack.sln` in `Visual Studio`. The projects are `Visual Studio 2015` compatible.

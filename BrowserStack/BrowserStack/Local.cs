@@ -22,7 +22,6 @@ namespace BrowserStack
     private PatternLayout patternLayout;
     protected BrowserStackTunnel tunnel = null;
     public static ILog logger = LogManager.GetLogger("Local");
-    public static ILog binaryLogger = LogManager.GetLogger("Binary Output");
     private static KeyValuePair<string, string> emptyStringPair = new KeyValuePair<string, string>();
 
     private static List<KeyValuePair<string, string>> valueCommands = new List<KeyValuePair<string, string>>() {
@@ -111,28 +110,7 @@ namespace BrowserStack
       hierarchy.Root.Level = Level.All;
       hierarchy.Configured = true;
     }
-    private void setupFileLogger(string filePath)
-    {
-      logger.Info("Logging Binary Output to - " + filePath);
-      RollingFileAppender roller = new RollingFileAppender();
-      roller.AppendToFile = true;
-      roller.File = filePath;
-      roller.Layout = patternLayout;
-      roller.Threshold = Level.All;
-
-      LoggerMatchFilter loggerMatchFilter = new LoggerMatchFilter();
-      loggerMatchFilter.LoggerToMatch = "Binary Output";
-      loggerMatchFilter.AcceptOnMatch = true;
-      roller.AddFilter(loggerMatchFilter);
-      roller.AddFilter(new DenyAllFilter());
-
-      roller.MaxSizeRollBackups = 5;
-      roller.MaximumFileSize = "1GB";
-      roller.RollingStyle = RollingFileAppender.RollingMode.Size;
-      roller.StaticLogFileName = true;
-      roller.ActivateOptions();
-      hierarchy.Root.AddAppender(roller);
-    }
+    
     public Local()
     {
       setupLogging();
@@ -153,7 +131,7 @@ namespace BrowserStack
         if (accessKey == null || accessKey.Trim().Length == 0)
         {
           throw new Exception("BROWSERSTACK_ACCESS_KEY cannot be empty. "+
-            "Specify one by adding key to options or adding to the environment variable BROWSERSTACK_KEY.");
+            "Specify one by adding key to options or adding to the environment variable BROWSERSTACK_ACCESS_KEY.");
         }
         Regex.Replace(this.accessKey, @"\s+", "");
       }
@@ -163,15 +141,13 @@ namespace BrowserStack
         customLogPath = Path.Combine(BrowserStackTunnel.basePaths[1], "local.log");
       }
 
-      setupFileLogger(customLogPath);
-      // argumentString += "-logFile " + customLogPath;
+      argumentString += "-logFile " + customLogPath;
       tunnel.addBinaryPath(customBinaryPath);
-      Console.WriteLine(argumentString);
       tunnel.addBinaryArguments(argumentString);
       while (true) {
         bool except = false;
         try {
-          tunnel.Run(accessKey, folder);
+          tunnel.Run(accessKey, folder, customLogPath);
         } catch (Exception)
         {
           logger.Warn("Running Local failed. Falling back to backup path.");

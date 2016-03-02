@@ -98,7 +98,7 @@ namespace BrowserStack
       dInfo.SetAccessControl(dSecurity);
     }
 
-    public virtual void Run(string accessKey, string folder)
+    public virtual void Run(string accessKey, string folder, string logFilePath)
     {
       string arguments = "";
       if (folder != null && folder.Trim().Length != 0)
@@ -142,7 +142,6 @@ namespace BrowserStack
         if (e.Data != null)
         {
           output.Append(e.Data);
-          Local.binaryLogger.Info(e.Data);
           
           foreach (KeyValuePair<LocalState, Regex> kv in stateMatchers)
           {
@@ -181,7 +180,42 @@ namespace BrowserStack
 
       AppDomain.CurrentDomain.ProcessExit += new EventHandler((s, e) => Kill());
 
+      new Thread(() =>
+      {
+        Thread.CurrentThread.IsBackground = true;
+        readFile(logFilePath);
+      }).Start();
       connectingEvent.WaitOne();
+    }
+
+    private void readFile(string filename)
+    {
+      using (Stream fileStream = File.Open(filename, FileMode.Create))
+        fileStream.Write(new Byte[1], 0, 1);
+      using (FileStream fs = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+      {
+        byte[] bytes = new byte[1024];
+        StringBuilder output = new StringBuilder();
+        while (true)
+        {
+          fs.Read(bytes, 0, 1024);
+          output.Append(Encoding.Default.GetString(bytes));
+
+          foreach (KeyValuePair<LocalState, Regex> kv in stateMatchers)
+          {
+            Match m = kv.Value.Match(output.ToString());
+            if (m.Success)
+            {
+              if (localState != kv.Key)
+                TunnelStateChanged(localState, kv.Key);
+
+              localState = kv.Key;
+              output.Clear();
+              break;
+            }
+          }
+        }
+      }
     }
 
     private void TunnelStateChanged(LocalState prevState, LocalState state)

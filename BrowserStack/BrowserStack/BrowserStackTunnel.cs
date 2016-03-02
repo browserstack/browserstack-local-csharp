@@ -74,15 +74,15 @@ namespace BrowserStack
     }
     public void downloadBinary()
     {
-      string binaryDirectory = Path.Combine(binaryAbsolute, "..");
-      string binaryAbsolute = Path.Combine(binaryDirectory, binaryName);
+      string binaryDirectory = Path.Combine(this.binaryAbsolute, "..");
+      //string binaryAbsolute = Path.Combine(binaryDirectory, binaryName);
 
       Directory.CreateDirectory(binaryDirectory);
 
       using (var client = new WebClient())
       {
         Local.logger.Info("Downloading BrowserStackLocal..");
-        client.DownloadFile(downloadURL, binaryAbsolute);
+        client.DownloadFile(this.downloadURL, this.binaryAbsolute);
         Local.logger.Info("Binary Downloaded.");
       }
 

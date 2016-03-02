@@ -20,7 +20,7 @@ namespace BrowserStack
     private string argumentString = "";
     private string customBinaryPath = "";
     private PatternLayout patternLayout;
-    private BrowserStackTunnel tunnel = null;
+    protected BrowserStackTunnel tunnel = null;
     public static ILog logger = LogManager.GetLogger("Local");
     public static ILog binaryLogger = LogManager.GetLogger("Binary Output");
     private static KeyValuePair<string, string> emptyStringPair = new KeyValuePair<string, string>();
@@ -136,6 +136,7 @@ namespace BrowserStack
     public Local()
     {
       setupLogging();
+      tunnel = new BrowserStackTunnel();
     }
     public void start(List<KeyValuePair<string, string>> options)
     {
@@ -164,7 +165,9 @@ namespace BrowserStack
 
       setupFileLogger(customLogPath);
       // argumentString += "-logFile " + customLogPath;
-      tunnel = new BrowserStackTunnel(customBinaryPath, argumentString);
+      tunnel.addBinaryPath(customBinaryPath);
+      Console.WriteLine(argumentString);
+      tunnel.addBinaryArguments(argumentString);
       while (true) {
         bool except = false;
         try {

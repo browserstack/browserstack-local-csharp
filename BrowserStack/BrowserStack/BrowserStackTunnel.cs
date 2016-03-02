@@ -15,7 +15,7 @@ namespace BrowserStack
 {
   public enum LocalState { Idle, Connecting, Connected, Error, Disconnected };
 
-  internal class BrowserStackTunnel : IDisposable
+  public class BrowserStackTunnel : IDisposable
   {
     static readonly string zipName = "BrowserStackLocal.zip";
     static readonly string binaryName = "BrowserStackLocal.exe";
@@ -26,11 +26,11 @@ namespace BrowserStack
       Path.GetTempPath() };
 
     int basePathsIndex = -1;
-    string binaryAbsolute = "";
-    string binaryArguments = "";
+    protected string binaryAbsolute = "";
+    protected string binaryArguments = "";
     public AutoResetEvent connectingEvent = new AutoResetEvent(false);
 
-    StringBuilder output;
+    protected StringBuilder output;
     public LocalState localState;
 
     Job job = null;
@@ -41,25 +41,31 @@ namespace BrowserStack
       { LocalState.Error, new Regex(@"\s*\*\*\* Error:\s+(.*).*", RegexOptions.Multiline) }
     };
 
-    public BrowserStackTunnel(string binaryAbsolute, string binaryArguments)
+    public virtual void addBinaryPath(string binaryAbsolute)
     {
       if (binaryAbsolute == null || binaryAbsolute.Trim().Length == 0)
       {
         binaryAbsolute = Path.Combine(basePaths[++basePathsIndex], binaryName);
       }
       this.binaryAbsolute = binaryAbsolute;
+    }
 
+    public virtual void addBinaryArguments(string binaryArguments)
+    {
       if (binaryArguments == null)
       {
         binaryArguments = "";
       }
-
-      localState = LocalState.Idle;
-      output = new StringBuilder();
       this.binaryArguments = binaryArguments;
     }
 
-    public void fallbackPaths()
+    public BrowserStackTunnel()
+    {
+      localState = LocalState.Idle;
+      output = new StringBuilder();
+    }
+
+    public virtual void fallbackPaths()
     {
       if (basePathsIndex >= basePaths.Length - 1)
       {
@@ -132,7 +138,7 @@ namespace BrowserStack
       Local.logger.Info("Binary Extracted");
     }
 
-    public void Run(string accessKey, string folder)
+    public virtual void Run(string accessKey, string folder)
     {
       string arguments = "";
       if (folder != null && folder.Trim().Length != 0)
@@ -232,7 +238,7 @@ namespace BrowserStack
       return (localState == LocalState.Connected);
     }
 
-    public void Kill()
+    public virtual void Kill()
     {
       try
       {

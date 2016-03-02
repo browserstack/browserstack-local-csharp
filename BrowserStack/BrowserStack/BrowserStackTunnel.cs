@@ -82,7 +82,7 @@ namespace BrowserStack
       using (var client = new WebClient())
       {
         Local.logger.Info("Downloading BrowserStackLocal..");
-        client.DownloadFile(this.downloadURL, this.binaryAbsolute);
+        client.DownloadFile(downloadURL, this.binaryAbsolute);
         Local.logger.Info("Binary Downloaded.");
       }
 

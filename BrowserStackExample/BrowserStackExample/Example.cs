@@ -20,7 +20,7 @@ namespace BrowserStackExample
         new KeyValuePair<string, string>("verbose", "true"),
         new KeyValuePair<string, string>("forcelocal", "true"),
         new KeyValuePair<string, string>("binarypath", "C:\\Users\\Admin\\Desktop\\BrowserStackLocal.exe"),
-        new KeyValuePair<string, string>("logFile", "C:\\Users\\Admin\\Desktop\\local.log"),
+        new KeyValuePair<string, string>("logfile", "C:\\Users\\Admin\\Desktop\\local.log"),
       };
       local.start(options);
       

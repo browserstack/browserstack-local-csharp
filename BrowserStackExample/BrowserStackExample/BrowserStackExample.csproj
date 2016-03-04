@@ -48,7 +48,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="BrowserStack">
-      <HintPath>..\..\BrowserStack\BrowserStack\bin\Release\BrowserStack.dll</HintPath>
+      <HintPath>..\..\BrowserStack\BrowserStack\bin\Debug\BrowserStack.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />

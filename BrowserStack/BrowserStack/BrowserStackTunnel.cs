@@ -17,7 +17,7 @@ namespace BrowserStack
   public class BrowserStackTunnel : IDisposable
   {
     static readonly string binaryName = "BrowserStackLocal.exe";
-    static readonly string downloadURL = "https://s3.amazonaws.com/browserStack/browserstack-local/BrowserStackLocal-win32.exe";
+    static readonly string downloadURL = "https://s3.amazonaws.com/browserStack/browserstack-local/BrowserStackLocal.exe";
     public static readonly string[] basePaths = new string[] {
       Path.Combine(Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%"), ".browserstack"),
       Directory.GetCurrentDirectory(),

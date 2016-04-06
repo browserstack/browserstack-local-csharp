@@ -37,6 +37,7 @@ namespace BrowserStack
       new KeyValuePair<string, string>("v", "-vvv"),
       new KeyValuePair<string, string>("force", "-force"),
       new KeyValuePair<string, string>("forcelocal", "-forcelocal"),
+      new KeyValuePair<string, string>("forceproxy", "-forceproxy"),
       new KeyValuePair<string, string>("onlyAutomate", "-onlyAutomate"),
     };
     private readonly string LOG4NET_CONFIG_FILE_PATH = Path.Combine(Directory.GetCurrentDirectory(), "log_config.xml");

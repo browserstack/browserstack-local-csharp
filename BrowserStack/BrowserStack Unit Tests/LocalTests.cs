@@ -121,6 +121,7 @@ namespace BrowserStack_Unit_Tests
       options.Add(new KeyValuePair<string, string>("v", "true"));
       options.Add(new KeyValuePair<string, string>("force", "true"));
       options.Add(new KeyValuePair<string, string>("forcelocal", "true"));
+      options.Add(new KeyValuePair<string, string>("forceproxy", "true"));
       options.Add(new KeyValuePair<string, string>("onlyAutomate", "true"));
 
       local = new LocalClass();
@@ -129,7 +130,7 @@ namespace BrowserStack_Unit_Tests
       local.setTunnel(tunnelMock.Object);
       local.start(options);
       tunnelMock.Verify(mock => mock.addBinaryPath(""), Times.Once);
-      tunnelMock.Verify(mock => mock.addBinaryArguments(It.IsRegex("-vvv.*-force.*-forcelocal.*-onlyAutomate")), Times.Once());
+      tunnelMock.Verify(mock => mock.addBinaryArguments(It.IsRegex("-vvv.*-force.*-forcelocal*-forceproxy.*-onlyAutomate")), Times.Once());
       tunnelMock.Verify(mock => mock.Run("dummyKey", "", logAbsolute), Times.Once());
       local.stop();
     }

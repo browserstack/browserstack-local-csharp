@@ -98,7 +98,7 @@ namespace BrowserStack
         }
         else
         {
-          argumentString += "-" + key + " '" + value + "' ";
+          argumentString += "-" + key + " " + value + " ";
         }
       }
     }

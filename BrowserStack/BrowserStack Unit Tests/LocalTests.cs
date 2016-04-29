@@ -130,7 +130,7 @@ namespace BrowserStack_Unit_Tests
       local.setTunnel(tunnelMock.Object);
       local.start(options);
       tunnelMock.Verify(mock => mock.addBinaryPath(""), Times.Once);
-      tunnelMock.Verify(mock => mock.addBinaryArguments(It.IsRegex("-vvv.*-force.*-forcelocal*-forceproxy.*-onlyAutomate")), Times.Once());
+      tunnelMock.Verify(mock => mock.addBinaryArguments(It.IsRegex("-vvv.*-force.*-forcelocal.*-forceproxy.*-onlyAutomate")), Times.Once());
       tunnelMock.Verify(mock => mock.Run("dummyKey", "", logAbsolute), Times.Once());
       local.stop();
     }
@@ -155,6 +155,29 @@ namespace BrowserStack_Unit_Tests
       tunnelMock.Verify(mock => mock.addBinaryPath(""), Times.Once);
       tunnelMock.Verify(mock => mock.addBinaryArguments(
         It.IsRegex("-localIdentifier.*dummyIdentifier.*dummyHost.*-proxyHost.*dummyHost.*-proxyPort.*dummyPort.*-proxyUser.*dummyUser.*-proxyPass.*dummyPass")
+        ), Times.Once());
+      tunnelMock.Verify(mock => mock.Run("dummyKey", "", logAbsolute), Times.Once());
+      local.stop();
+    }
+
+    [TestMethod]
+    public void TestWorksWithCustomOptions()
+    {
+      options = new List<KeyValuePair<string, string>>();
+      options.Add(new KeyValuePair<string, string>("key", "dummyKey"));
+      options.Add(new KeyValuePair<string, string>("customBoolKey1", "true"));
+      options.Add(new KeyValuePair<string, string>("customBoolKey2", "false"));
+      options.Add(new KeyValuePair<string, string>("customKey1", "customValue1"));
+      options.Add(new KeyValuePair<string, string>("customKey2", "customValue2"));
+      
+      local = new LocalClass();
+      Mock<BrowserStackTunnel> tunnelMock = new Mock<BrowserStackTunnel>();
+      tunnelMock.Setup(mock => mock.Run("dummyKey", "", logAbsolute));
+      local.setTunnel(tunnelMock.Object);
+      local.start(options);
+      tunnelMock.Verify(mock => mock.addBinaryPath(""), Times.Once);
+      tunnelMock.Verify(mock => mock.addBinaryArguments(
+        It.IsRegex("-customBoolKey1.*customBoolKey2.*-customKey1.*'customValue1'.*-customKey2.*'customValue2'")
         ), Times.Once());
       tunnelMock.Verify(mock => mock.Run("dummyKey", "", logAbsolute), Times.Once());
       local.stop();

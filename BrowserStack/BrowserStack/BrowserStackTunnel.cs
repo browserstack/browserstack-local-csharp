@@ -30,6 +30,8 @@ namespace BrowserStack
 
     protected StringBuilder output;
     public LocalState localState;
+    protected string logFilePath = "";
+    protected FileSystemWatcher logfileWatcher;
 
     Job job = null;
     Process process = null;
@@ -120,6 +122,10 @@ namespace BrowserStack
         process.Close();
       }
 
+      if (File.Exists(logFilePath))
+      {
+        File.WriteAllText(logFilePath, string.Empty);
+      }
       Local.logger.Info("BrowserStackLocal binary is located at " + binaryAbsolute);
       Local.logger.Info("Starting Binary with arguments " + arguments.Replace(accessKey, "<access_key>"));
       ProcessStartInfo processStartInfo = new ProcessStartInfo()
@@ -190,8 +196,30 @@ namespace BrowserStack
 
     private void readFile(string filename)
     {
-      using (Stream fileStream = File.Open(filename, FileMode.Create))
-        fileStream.Write(new Byte[1], 0, 1);
+      logFilePath = filename;
+      if (File.Exists(filename))
+      {
+        readAlreadyPresentFile(filename);
+      }
+      else
+      {
+        logfileWatcher = new FileSystemWatcher(new FileInfo(filename).Directory.FullName);
+        logfileWatcher.Created += readAlreadyPresentFile;
+        logfileWatcher.Changed += readAlreadyPresentFile;
+        logfileWatcher.EnableRaisingEvents = true;
+      }
+    }
+
+    private void readAlreadyPresentFile(object sender, FileSystemEventArgs e)
+    {
+      if (e.FullPath.Equals(logFilePath))
+      {
+        readAlreadyPresentFile(e.FullPath);
+      }
+    }
+
+    private void readAlreadyPresentFile(string filename)
+    {
       using (FileStream fs = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
       {
         byte[] bytes = new byte[1024];
@@ -224,7 +252,6 @@ namespace BrowserStack
       {
         connectingEvent.Set();
       }
-      Local.logger.Info("Current tunnel state " + state);
     }
 
     public bool IsConnected()
@@ -236,10 +263,12 @@ namespace BrowserStack
     {
       try
       {
-        this.process.Kill();
-        this.process = null;
-        this.job.Close();
-        this.job = null;
+        if (process != null)
+          process.Kill();
+        process = null;
+        if (job != null)
+          job.Close();
+        job = null;
       }
       catch (Exception e)
       {
@@ -251,7 +280,6 @@ namespace BrowserStack
           TunnelStateChanged(localState, LocalState.Disconnected);
 
         localState = LocalState.Disconnected;
-        Local.logger.Info("TunnelState: " + localState.ToString());
       }
     }
 

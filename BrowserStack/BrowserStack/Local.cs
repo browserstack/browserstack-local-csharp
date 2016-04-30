@@ -69,12 +69,17 @@ namespace BrowserStack
       {
         customLogPath = value;
       }
+      else if (key.Equals("verbose"))
+      {
+
+      }
       else
       {
         result = valueCommands.Find(pair => pair.Key == key);
         if (!result.Equals(emptyStringPair))
         {
-          argumentString += result.Value + " " + value + " ";
+          argumentString += result.Value + " '" + value + "' ";
+          return;
         }
 
         result = booleanCommands.Find(pair => pair.Key == key);
@@ -83,7 +88,17 @@ namespace BrowserStack
           if (value.Trim().ToLower() == "true")
           {
             argumentString += result.Value + " ";
+            return;
           }
+        }
+
+        if (value.Trim().ToLower() == "true")
+        {
+          argumentString += "-" + key + " ";
+        }
+        else
+        {
+          argumentString += "-" + key + " '" + value + "' ";
         }
       }
     }

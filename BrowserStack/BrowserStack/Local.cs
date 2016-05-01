@@ -78,7 +78,7 @@ namespace BrowserStack
         result = valueCommands.Find(pair => pair.Key == key);
         if (!result.Equals(emptyStringPair))
         {
-          argumentString += result.Value + " '" + value + "' ";
+          argumentString += result.Value + " " + value + " ";
           return;
         }
 

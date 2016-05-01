@@ -46,6 +46,7 @@ namespace BrowserStackExample
 
       driver.Quit();
       local.stop();
+      Console.WriteLine("Test Completed.");
       Console.ReadLine();
     }
   }

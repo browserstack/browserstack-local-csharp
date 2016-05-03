@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/browserstack/browserstack-local-csharp.svg?branch=master)](https://travis-ci.org/browserstack/browserstack-local-csharp)
 
-A simple C-sharp wrapper for BrowserStack Local Binary.
+C# bindings for BrowserStack Local.
 
 ## Setup
 

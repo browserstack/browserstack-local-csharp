@@ -6,8 +6,8 @@
     <ProjectGuid>{FF1ABB6F-4A2C-48F4-B4DB-47DAD566D2F9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BrowserStack_Unit_Tests</RootNamespace>
-    <AssemblyName>BrowserStack Unit Tests</AssemblyName>
+    <RootNamespace>BrowserStackLocal_Unit_Tests</RootNamespace>
+    <AssemblyName>BrowserStackLocal Unit Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -81,9 +81,9 @@
     <Compile Include="BrowserStackTunnelTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\BrowserStack\BrowserStack.csproj">
+    <ProjectReference Include="..\BrowserStackLocal\BrowserStackLocal.csproj">
       <Project>{f58e1c9a-5910-4da8-b531-9f4a6b0ae8c8}</Project>
-      <Name>BrowserStack</Name>
+      <Name>BrowserStackLocal</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

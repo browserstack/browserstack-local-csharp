@@ -177,7 +177,7 @@ namespace BrowserStack_Unit_Tests
       local.start(options);
       tunnelMock.Verify(mock => mock.addBinaryPath(""), Times.Once);
       tunnelMock.Verify(mock => mock.addBinaryArguments(
-        It.IsRegex("-customBoolKey1.*customBoolKey2.*-customKey1.*'customValue1'.*-customKey2.*'customValue2'")
+        It.IsRegex("-customBoolKey1.*-customBoolKey2.*-customKey1.*customValue1.*-customKey2.*customValue2")
         ), Times.Once());
       tunnelMock.Verify(mock => mock.Run("dummyKey", "", logAbsolute), Times.Once());
       local.stop();

@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/browserstack/browserstack-local-csharp.svg?branch=master)](https://travis-ci.org/browserstack/browserstack-local-csharp)
 
-A simple C-sharp wrapper for BrowserStack Local Binary.
+C# bindings for BrowserStack Local.
 
 ## Setup
 
@@ -110,6 +110,10 @@ bsLocalArgs.Add(new KeyValuePair<string, string>("logfile", "/browserstack/logs.
 ### Build Instructions
 
 To run the test suite run the nunit tests from Visual Studio.
+
+### Packaging
+
+To pack using nuget, run `nuget pack BrowserStackLocal\BrowserStackLocal\BrowserStackLocal.csproj -Prop Configuration=Release`
 
 ### Reporting bugs
 

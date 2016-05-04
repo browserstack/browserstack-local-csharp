@@ -1,6 +1,6 @@
 language: csharp
-solution: BrowserStack/BrowserStack.sln
+solution: BrowserStackLocal/BrowserStackLocal.sln
 before_install:
   - sudo apt-get install nunit-console
 after_script:
-  - nunit-console BrowserStack/BrowserStack\ Unit\ Tests/bin/Release/BrowserStack\ Unit\ Tests.dll
+  - nunit-console BrowserStackLocal/BrowserStackLocal\ Unit\ Tests/bin/Release/BrowserStackLocal\ Unit\ Tests.dll

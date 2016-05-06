@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>browserstack-local</id>
+    <version>0.1.0</version>
+    <authors>BrowserStack Support</authors>
+    <owners>BrowserStack Support</owners>
+    <licenseUrl>https://opensource.org/licenses/MIT</licenseUrl>
+    <projectUrl>https://github.com/browserstack/browserstack-local-csharp</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>C# Bindings for BrowserStack Local</description>
+    <releaseNotes>Initial Release</releaseNotes>
+    <copyright>Copyright 2016</copyright>
+    <tags>BrowserStack Local Selenium Testing</tags>
+    <dependencies>
+      <dependency id="log4net" version="2.0.5" />
+    </dependencies>
+  </metadata>
+</package>

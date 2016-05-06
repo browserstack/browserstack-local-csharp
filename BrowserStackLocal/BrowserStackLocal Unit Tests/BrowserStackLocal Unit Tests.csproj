@@ -81,9 +81,9 @@
     <Compile Include="BrowserStackTunnelTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\BrowserStack\BrowserStack.csproj">
+    <ProjectReference Include="..\BrowserStackLocal\BrowserStackLocal.csproj">
       <Project>{f58e1c9a-5910-4da8-b531-9f4a6b0ae8c8}</Project>
-      <Name>BrowserStack</Name>
+      <Name>BrowserStackLocal</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

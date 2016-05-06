@@ -1,5 +1,5 @@
-BrowserStack/BrowserStack Unit Tests/bin
-BrowserStack/BrowserStack Unit Tests/obj
-BrowserStack/BrowserStack/bin
-BrowserStack/BrowserStack/obj
-BrowserStack/packages
+BrowserStackLocal/BrowserStackLocal Unit Tests/bin
+BrowserStackLocal/BrowserStackLocal Unit Tests/obj
+BrowserStackLocal/BrowserStackLocal/bin
+BrowserStackLocal/BrowserStackLocal/obj
+BrowserStackLocal/packages

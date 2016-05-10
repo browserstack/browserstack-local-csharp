@@ -14,7 +14,7 @@ namespace BrowserStackExample
 
       List<KeyValuePair<string, string>> options = new List<KeyValuePair<string, string>>() {
         new KeyValuePair<string, string>("key", BROWSERSTACK_ACCESS_KEY),
-        new KeyValuePair<string, string>("localIdentifier", "identifier"),
+        //new KeyValuePair<string, string>("localIdentifier", "identifier"),
         //new KeyValuePair<string, string>("f", "C:\\Users\\Admin\\Desktop\\"),
         new KeyValuePair<string, string>("onlyAutomate", "true"),
         new KeyValuePair<string, string>("verbose", "true"),
@@ -29,7 +29,7 @@ namespace BrowserStackExample
       DesiredCapabilities capability = DesiredCapabilities.Firefox();
       capability.SetCapability("browserstack.user", BROWSERSTACK_USERNAME);
       capability.SetCapability("browserstack.key", BROWSERSTACK_ACCESS_KEY);
-      capability.SetCapability("browserstack.localIdentifier", "identifier");
+      //capability.SetCapability("browserstack.localIdentifier", "identifier");
       capability.SetCapability("browserstack.local", true);
       capability.SetCapability("build", "build");
 

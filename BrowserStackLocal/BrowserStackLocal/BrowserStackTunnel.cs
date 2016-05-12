@@ -9,6 +9,8 @@ using System.Net;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Threading;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace BrowserStack
 {
@@ -26,20 +28,13 @@ namespace BrowserStack
     int basePathsIndex = -1;
     protected string binaryAbsolute = "";
     protected string binaryArguments = "";
-    public AutoResetEvent connectingEvent = new AutoResetEvent(false);
-
+    
     protected StringBuilder output;
     public LocalState localState;
     protected string logFilePath = "";
     protected FileSystemWatcher logfileWatcher;
 
-    Job job = null;
     Process process = null;
-
-    private static Dictionary<LocalState, Regex> stateMatchers = new Dictionary<LocalState, Regex>() {
-      { LocalState.Connected, new Regex(@"Press Ctrl-C to exit.*", RegexOptions.Multiline) },
-      { LocalState.Error, new Regex(@"\s*\*\*\* Error:\s+(.*).*", RegexOptions.Multiline) }
-    };
 
     public virtual void addBinaryPath(string binaryAbsolute)
     {
@@ -100,16 +95,16 @@ namespace BrowserStack
       dInfo.SetAccessControl(dSecurity);
     }
 
-    public virtual void Run(string accessKey, string folder, string logFilePath)
+    public virtual void Run(string accessKey, string folder, string logFilePath, string processType)
     {
-      string arguments = "";
+      string arguments = "-d " + processType + " ";
       if (folder != null && folder.Trim().Length != 0)
       {
-        arguments = "-f " + accessKey + " " + folder + " " + binaryArguments;
+        arguments += "-f " + accessKey + " " + folder + " " + binaryArguments;
       }
       else
       {
-        arguments = accessKey + " " + binaryArguments;
+        arguments += accessKey + " " + binaryArguments;
       }
       if (!File.Exists(binaryAbsolute))
       {
@@ -122,12 +117,17 @@ namespace BrowserStack
         process.Close();
       }
 
-      if (File.Exists(logFilePath))
+      if (processType.ToLower().Contains("start") && File.Exists(logFilePath))
       {
         File.WriteAllText(logFilePath, string.Empty);
       }
       Local.logger.Info("BrowserStackLocal binary is located at " + binaryAbsolute);
       Local.logger.Info("Starting Binary with arguments " + arguments.Replace(accessKey, "<access_key>"));
+      RunProcess(arguments, processType); 
+    }
+
+    private void RunProcess(string arguments, string processType)
+    {
       ProcessStartInfo processStartInfo = new ProcessStartInfo()
       {
         FileName = binaryAbsolute,
@@ -147,21 +147,10 @@ namespace BrowserStack
       {
         if (e.Data != null)
         {
-          output.Append(e.Data);
-          
-          foreach (KeyValuePair<LocalState, Regex> kv in stateMatchers)
+          dynamic binaryOutput = JObject.Parse(e.Data);
+          if(binaryOutput.state != null && !binaryOutput.state.ToString().ToLower().Contains("connected"))
           {
-            Match m = kv.Value.Match(e.Data);
-            if (m.Success)
-            {
-              if (localState != kv.Key)
-                TunnelStateChanged(localState, kv.Key);
-
-              localState = kv.Key;
-              output.Clear();
-              Local.logger.Info("TunnelState: " + localState.ToString());
-              break;
-            }
+            throw new Exception("Eror while executing BrowserStackLocal " + processType);
           }
         }
       });
@@ -170,128 +159,44 @@ namespace BrowserStack
       process.ErrorDataReceived += o;
       process.Exited += ((s, e) =>
       {
-        Kill();
         process = null;
       });
 
       process.Start();
-      
-      job = new Job();
-      job.AddProcess(process.Handle);
-      
+
       process.BeginOutputReadLine();
       process.BeginErrorReadLine();
 
       TunnelStateChanged(LocalState.Idle, LocalState.Connecting);
-
       AppDomain.CurrentDomain.ProcessExit += new EventHandler((s, e) => Kill());
 
-      new Thread(() =>
-      {
-        Thread.CurrentThread.IsBackground = true;
-        readFile(logFilePath);
-      }).Start();
-      connectingEvent.WaitOne();
+      process.WaitForExit();
     }
 
-    private void readFile(string filename)
-    {
-      logFilePath = filename;
-      if (File.Exists(filename))
-      {
-        readAlreadyPresentFile(filename);
-      }
-      else
-      {
-        logfileWatcher = new FileSystemWatcher(new FileInfo(filename).Directory.FullName);
-        logfileWatcher.Created += readAlreadyPresentFile;
-        logfileWatcher.Changed += readAlreadyPresentFile;
-        logfileWatcher.EnableRaisingEvents = true;
-      }
-    }
-
-    private void readAlreadyPresentFile(object sender, FileSystemEventArgs e)
-    {
-      if (e.FullPath.Equals(logFilePath))
-      {
-        readAlreadyPresentFile(e.FullPath);
-      }
-    }
-
-    private void readAlreadyPresentFile(string filename)
-    {
-      using (FileStream fs = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-      {
-        byte[] bytes = new byte[1024];
-        StringBuilder output = new StringBuilder();
-        while (true)
-        {
-          fs.Read(bytes, 0, 1024);
-          output.Append(Encoding.Default.GetString(bytes));
-
-          foreach (KeyValuePair<LocalState, Regex> kv in stateMatchers)
-          {
-            Match m = kv.Value.Match(output.ToString());
-            if (m.Success)
-            {
-              if (localState != kv.Key)
-                TunnelStateChanged(localState, kv.Key);
-
-              localState = kv.Key;
-              output.Clear();
-              break;
-            }
-          }
-        }
-      }
-    }
-
-    private void TunnelStateChanged(LocalState prevState, LocalState state)
-    {
-      if (state != LocalState.Connecting)
-      {
-        connectingEvent.Set();
-      }
-    }
+    private void TunnelStateChanged(LocalState prevState, LocalState state) { }
 
     public bool IsConnected()
     {
       return (localState == LocalState.Connected);
     }
 
-    public virtual void Kill()
+    public void Kill()
     {
-      try
+      if (process != null)
       {
-        if (process != null)
-          process.Kill();
+        process.Close();
+        process.Kill();
         process = null;
-        if (job != null)
-          job.Close();
-        job = null;
-      }
-      catch (Exception e)
-      {
-        Local.logger.Error("Error killing: " + e.Message);
-      }
-      finally
-      {
-        if (localState != LocalState.Disconnected)
-          TunnelStateChanged(localState, LocalState.Disconnected);
-
         localState = LocalState.Disconnected;
       }
     }
 
     public void Dispose()
     {
-      Dispose(true);
-      GC.SuppressFinalize(this);
-    }
-
-    protected virtual void Dispose(bool disposing)
-    {
-      Kill();
+      if(process != null)
+      {
+        Kill();
+      }
     }
   }
 }

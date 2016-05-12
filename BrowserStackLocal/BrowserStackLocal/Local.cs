@@ -163,7 +163,7 @@ namespace BrowserStack
       while (true) {
         bool except = false;
         try {
-          tunnel.Run(accessKey, folder, customLogPath);
+          tunnel.Run(accessKey, folder, customLogPath, "start");
         } catch (Exception)
         {
           logger.Warn("Running Local failed. Falling back to backup path.");
@@ -181,10 +181,8 @@ namespace BrowserStack
 
     public void stop()
     {
-      if (tunnel != null)
-      {
-        tunnel.Kill();
-      }
+      tunnel.Run(accessKey, folder, customLogPath, "stop");
+      tunnel.Kill();
     }
   }
 }

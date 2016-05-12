@@ -147,10 +147,10 @@ namespace BrowserStack
       {
         if (e.Data != null)
         {
-          dynamic binaryOutput = JObject.Parse(e.Data);
-          if(binaryOutput.state != null && !binaryOutput.state.ToString().ToLower().Contains("connected"))
+          JObject binaryOutput = JObject.Parse(e.Data);
+          if(binaryOutput.GetValue("state") != null && !binaryOutput.GetValue("state").ToString().ToLower().Equals("connected"))
           {
-            throw new Exception("Eror while executing BrowserStackLocal " + processType);
+            throw new Exception("Eror while executing BrowserStackLocal " + processType + " " + e.Data);
           }
         }
       });

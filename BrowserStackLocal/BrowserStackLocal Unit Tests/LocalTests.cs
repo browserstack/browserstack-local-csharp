@@ -57,7 +57,7 @@ namespace BrowserStack_Unit_Tests
       local.setTunnel(tunnelMock.Object);
       Assert.DoesNotThrow(new TestDelegate(startWithOptions),
         "BROWSERSTACK_ACCESS_KEY cannot be empty. Specify one by adding key to options or adding to the environment variable BROWSERSTACK_KEY.");
-      tunnelMock.Verify(mock => mock.addBinaryArguments("-logFile " + logAbsolute), Times.Once());
+      tunnelMock.Verify(mock => mock.addBinaryArguments("-logFile \"" + logAbsolute + "\" "), Times.Once());
       tunnelMock.Verify(mock => mock.Run("dummyKey", "", logAbsolute, "start"), Times.Once());
       local.stop();
     }
@@ -73,7 +73,7 @@ namespace BrowserStack_Unit_Tests
       local.setTunnel(tunnelMock.Object);
       Assert.DoesNotThrow(new TestDelegate(startWithOptions),
         "BROWSERSTACK_ACCESS_KEY cannot be empty. Specify one by adding key to options or adding to the environment variable BROWSERSTACK_KEY.");
-      tunnelMock.Verify(mock => mock.addBinaryArguments("-logFile " + logAbsolute), Times.Once());
+      tunnelMock.Verify(mock => mock.addBinaryArguments("-logFile \"" + logAbsolute + "\" "), Times.Once());
       tunnelMock.Verify(mock => mock.Run("envDummyKey", "", logAbsolute, "start"), Times.Once());
       local.stop();
     }
@@ -90,7 +90,7 @@ namespace BrowserStack_Unit_Tests
       tunnelMock.Setup(mock => mock.Run("dummyKey", "dummyFolderPath", logAbsolute, "start"));
       local.setTunnel(tunnelMock.Object);
       local.start(options);
-      tunnelMock.Verify(mock => mock.addBinaryArguments("-logFile " + logAbsolute), Times.Once());
+      tunnelMock.Verify(mock => mock.addBinaryArguments("-logFile \"" + logAbsolute + "\" "), Times.Once());
       tunnelMock.Verify(mock => mock.Run("dummyKey", "dummyFolderPath", logAbsolute, "start"), Times.Once());
       local.stop();
     }
@@ -108,7 +108,7 @@ namespace BrowserStack_Unit_Tests
       local.setTunnel(tunnelMock.Object);
       local.start(options);
       tunnelMock.Verify(mock => mock.addBinaryPath("dummyPath"), Times.Once);
-      tunnelMock.Verify(mock => mock.addBinaryArguments("-logFile " + logAbsolute), Times.Once());
+      tunnelMock.Verify(mock => mock.addBinaryArguments("-logFile \"" + logAbsolute + "\" "), Times.Once());
       tunnelMock.Verify(mock => mock.Run("dummyKey", "", logAbsolute, "start"), Times.Once());
       local.stop();
     }
@@ -201,7 +201,7 @@ namespace BrowserStack_Unit_Tests
       local.setTunnel(tunnelMock.Object);
       local.start(options);
       tunnelMock.Verify(mock => mock.addBinaryPath(""), Times.Once);
-      tunnelMock.Verify(mock => mock.addBinaryArguments("-logFile " + logAbsolute), Times.Once());
+      tunnelMock.Verify(mock => mock.addBinaryArguments("-logFile \"" + logAbsolute + "\" "), Times.Once());
       tunnelMock.Verify(mock => mock.Run("dummyKey", "", logAbsolute, "start"), Times.Exactly(2));
       tunnelMock.Verify(mock => mock.fallbackPaths(), Times.Once());
       local.stop();
@@ -220,7 +220,7 @@ namespace BrowserStack_Unit_Tests
       local.start(options);
       local.stop();
       tunnelMock.Verify(mock => mock.addBinaryPath(""), Times.Once);
-      tunnelMock.Verify(mock => mock.addBinaryArguments("-logFile " + logAbsolute), Times.Once());
+      tunnelMock.Verify(mock => mock.addBinaryArguments("-logFile \"" + logAbsolute + "\" "), Times.Once());
       tunnelMock.Verify(mock => mock.Run("dummyKey", "", logAbsolute, "start"), Times.Once());
     }
 

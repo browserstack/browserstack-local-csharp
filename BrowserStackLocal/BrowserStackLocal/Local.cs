@@ -157,7 +157,7 @@ namespace BrowserStack
         customLogPath = Path.Combine(BrowserStackTunnel.basePaths[1], "local.log");
       }
 
-      argumentString += "-logFile " + customLogPath;
+      argumentString += "-logFile \"" + customLogPath + "\" ";
       tunnel.addBinaryPath(customBinaryPath);
       tunnel.addBinaryArguments(argumentString);
       while (true) {

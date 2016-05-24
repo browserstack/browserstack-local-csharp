@@ -43,7 +43,7 @@ namespace BrowserStack_Unit_Tests
 
       Assert.Throws(typeof(Exception),
         new TestDelegate(startWithOptions),
-        "BROWSERSTACK_ACCESS_KEY cannot be empty. Specify one by adding key to options or adding to the environment variable BROWSERSTACK_KEY.");
+        "BROWSERSTACK_ACCESS_KEY cannot be empty. Specify one by adding key to options or adding to the environment variable BROWSERSTACK_ACCESS_KEY.");
       local.stop();
     }
 
@@ -56,7 +56,7 @@ namespace BrowserStack_Unit_Tests
       Mock<BrowserStackTunnel> tunnelMock = new Mock<BrowserStackTunnel>();
       local.setTunnel(tunnelMock.Object);
       Assert.DoesNotThrow(new TestDelegate(startWithOptions),
-        "BROWSERSTACK_ACCESS_KEY cannot be empty. Specify one by adding key to options or adding to the environment variable BROWSERSTACK_KEY.");
+        "BROWSERSTACK_ACCESS_KEY cannot be empty. Specify one by adding key to options or adding to the environment variable BROWSERSTACK_ACCESS_KEY.");
       tunnelMock.Verify(mock => mock.addBinaryArguments("-logFile \"" + logAbsolute + "\" "), Times.Once());
       tunnelMock.Verify(mock => mock.Run("dummyKey", "", logAbsolute, "start"), Times.Once());
       local.stop();
@@ -72,7 +72,7 @@ namespace BrowserStack_Unit_Tests
       tunnelMock.Setup(mock => mock.Run("envDummyKey", "", logAbsolute, "start"));
       local.setTunnel(tunnelMock.Object);
       Assert.DoesNotThrow(new TestDelegate(startWithOptions),
-        "BROWSERSTACK_ACCESS_KEY cannot be empty. Specify one by adding key to options or adding to the environment variable BROWSERSTACK_KEY.");
+        "BROWSERSTACK_ACCESS_KEY cannot be empty. Specify one by adding key to options or adding to the environment variable BROWSERSTACK_ACCESS_KEY.");
       tunnelMock.Verify(mock => mock.addBinaryArguments("-logFile \"" + logAbsolute + "\" "), Times.Once());
       tunnelMock.Verify(mock => mock.Run("envDummyKey", "", logAbsolute, "start"), Times.Once());
       local.stop();

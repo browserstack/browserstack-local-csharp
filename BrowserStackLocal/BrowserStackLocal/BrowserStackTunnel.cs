@@ -1,14 +1,11 @@
 ﻿using System;
 using System.IO;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Net;
 
 using System.Security.AccessControl;
 using System.Security.Principal;
-using System.Threading;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -78,14 +75,11 @@ namespace BrowserStack
 
       using (var client = new WebClient())
       {
-        Local.logger.Info("Downloading BrowserStackLocal..");
         client.DownloadFile(downloadURL, this.binaryAbsolute);
-        Local.logger.Info("Binary Downloaded.");
       }
 
       if (!File.Exists(binaryAbsolute))
       {
-        Local.logger.Error("Error accessing downloaded zip. Please check file permissions.");
         throw new Exception("Error accessing file " + binaryAbsolute);
       }
 
@@ -108,7 +102,6 @@ namespace BrowserStack
       }
       if (!File.Exists(binaryAbsolute))
       {
-        Local.logger.Warn("BrowserStackLocal binary was not found at " + binaryAbsolute);
         downloadBinary();
       }
 
@@ -121,8 +114,6 @@ namespace BrowserStack
       {
         File.WriteAllText(logFilePath, string.Empty);
       }
-      Local.logger.Info("BrowserStackLocal binary is located at " + binaryAbsolute);
-      Local.logger.Info("Starting Binary with arguments " + arguments.Replace(accessKey, "<access_key>"));
       RunProcess(arguments, processType); 
     }
 

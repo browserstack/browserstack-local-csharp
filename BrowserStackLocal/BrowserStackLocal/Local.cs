@@ -1,9 +1,3 @@
-using log4net;
-using log4net.Appender;
-using log4net.Core;
-using log4net.Filter;
-using log4net.Layout;
-using log4net.Repository.Hierarchy;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,15 +7,12 @@ namespace BrowserStack
 {
   public class Local
   {
-    private Hierarchy hierarchy;
     private string folder = "";
     private string accessKey = "";
     private string customLogPath = "";
     private string argumentString = "";
     private string customBinaryPath = "";
-    private PatternLayout patternLayout;
     protected BrowserStackTunnel tunnel = null;
-    public static ILog logger = LogManager.GetLogger("Local");
     private static KeyValuePair<string, string> emptyStringPair = new KeyValuePair<string, string>();
 
     private static List<KeyValuePair<string, string>> valueCommands = new List<KeyValuePair<string, string>>() {
@@ -102,34 +93,9 @@ namespace BrowserStack
         }
       }
     }
-    private void setupLogging()
-    {
-      hierarchy = (Hierarchy)LogManager.GetRepository();
-
-      patternLayout = new PatternLayout();
-      patternLayout.ConversionPattern = "%date [%thread] %-5level %logger - %message%newline";
-      patternLayout.ActivateOptions();
-
-      ConsoleAppender consoleAppender = new ConsoleAppender();
-      consoleAppender.Threshold = Level.Info;
-      consoleAppender.Layout = patternLayout;
-      consoleAppender.ActivateOptions();
-
-      LoggerMatchFilter loggerMatchFilter = new LoggerMatchFilter();
-      loggerMatchFilter.LoggerToMatch = "Local";
-      loggerMatchFilter.AcceptOnMatch = true;
-      consoleAppender.AddFilter(loggerMatchFilter);
-      consoleAppender.AddFilter(new DenyAllFilter());
-
-      hierarchy.Root.AddAppender(consoleAppender);
-
-      hierarchy.Root.Level = Level.All;
-      hierarchy.Configured = true;
-    }
     
     public Local()
     {
-      setupLogging();
       tunnel = new BrowserStackTunnel();
     }
     public void start(List<KeyValuePair<string, string>> options)
@@ -166,7 +132,6 @@ namespace BrowserStack
           tunnel.Run(accessKey, folder, customLogPath, "start");
         } catch (Exception)
         {
-          logger.Warn("Running Local failed. Falling back to backup path.");
           except = true;
         }
         if (except)

@@ -61,7 +61,7 @@ namespace BrowserStack
     {
       if (basePathsIndex >= basePaths.Length - 1)
       {
-        throw new Exception("No More Paths to try. Please specify a binary path in options.");
+        throw new Exception("Binary not found or failed to launch. Make sure that BrowserStackLocal.exe is not already running.");
       }
       basePathsIndex++;
       binaryAbsolute = Path.Combine(basePaths[basePathsIndex], binaryName);

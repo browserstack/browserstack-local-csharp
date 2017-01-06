@@ -79,7 +79,7 @@ namespace BrowserStack_Unit_Tests
       tunnel.fallbackPaths();
       Assert.Throws(typeof(Exception),
         new TestDelegate(testFallbackException),
-        "No More Paths to try. Please specify a binary path in options."
+        "Binary not found or failed to launch. Make sure that BrowserStackLocal.exe is not already running."
         );
     }
     [TestMethod]

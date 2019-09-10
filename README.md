@@ -81,6 +81,30 @@ bsLocalArgs.Add(new KeyValuePair<string, string>("proxyUser", "user"));
 bsLocalArgs.Add(new KeyValuePair<string, string>("proxyPass", "password"));
 ```
 
+#### Local Proxy
+To use local proxy in local testing -
+
+* localProxyHost: Hostname/IP of proxy, remaining proxy options are ignored if this option is absent
+* localProxyPort: Port for the proxy, defaults to 8081 when -localProxyHost is used
+* localProxyUser: Username for connecting to proxy (Basic Auth Only)
+* localProxyPass: Password for USERNAME, will be ignored if USERNAME is empty or not specified
+
+```
+bsLocalArgs.Add(new KeyValuePair<string, string>("localProxyHost", "127.0.0.1"));
+bsLocalArgs.Add(new KeyValuePair<string, string>("localProxyPort", "8000"));
+bsLocalArgs.Add(new KeyValuePair<string, string>("-localProxyUser", "user"));
+bsLocalArgs.Add(new KeyValuePair<string, string>("-localProxyPass", "password"));
+```
+
+#### PAC (Proxy Auto-Configuration)
+To use PAC (Proxy Auto-Configuration) in local testing -
+
+* pac-file: PAC (Proxy Auto-Configuration) file’s absolute path
+
+```
+bsLocalArgs.Add(new KeyValuePair<string, string>("-pac-file", "<pac_file_abs_path>"));
+```
+
 #### Local Identifier
 If doing simultaneous multiple local testing connections, set this uniquely for different processes -
 ```

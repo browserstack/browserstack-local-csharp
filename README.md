@@ -135,6 +135,10 @@ bsLocalArgs.Add(new KeyValuePair<string, string>("logfile", "/browserstack/logs.
 
 To run the test suite run the nunit tests from Visual Studio.
 
+### Signing
+
+Build Release version and then sign it so that it is strongly named.
+
 ### Packaging
 
 To pack using nuget, run `nuget pack BrowserStackLocal\BrowserStackLocal\BrowserStackLocal.csproj -Prop Configuration=Release`

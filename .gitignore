@@ -4,3 +4,7 @@ BrowserStackLocal/BrowserStackLocal/bin
 BrowserStackLocal/BrowserStackLocal/obj
 BrowserStackLocal/packages
 BrowserStackLocal/.vs
+BrowserStackLocalExample/BrowserStackExample/bin
+BrowserStackLocalExample/BrowserStackExample/obj
+BrowserStackLocalExample/packages
+BrowserStackLocalExample/.vs

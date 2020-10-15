@@ -6,7 +6,6 @@ using System.Net;
 
 using System.Security.AccessControl;
 using System.Security.Principal;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace BrowserStack

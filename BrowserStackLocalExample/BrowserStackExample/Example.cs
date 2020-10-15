@@ -26,7 +26,7 @@ namespace BrowserStackExample
       
       // Run WebDriver Tests
       IWebDriver driver;
-      DesiredCapabilities capability = DesiredCapabilities.Firefox();
+      DesiredCapabilities capability = DesiredCapabilities.Chrome();
       capability.SetCapability("browserstack.user", BROWSERSTACK_USERNAME);
       capability.SetCapability("browserstack.key", BROWSERSTACK_ACCESS_KEY);
       //capability.SetCapability("browserstack.localIdentifier", "identifier");

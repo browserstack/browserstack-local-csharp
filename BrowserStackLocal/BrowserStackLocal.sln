@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrowserStackLocal", "Browse
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrowserStackLocal Unit Tests", "BrowserStackLocal Unit Tests\BrowserStackLocal Unit Tests.csproj", "{FF1ABB6F-4A2C-48F4-B4DB-47DAD566D2F9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrowserStackLocalIntegrationTests", "BrowserStackLocalIntegrationTests\BrowserStackLocalIntegrationTests.csproj", "{01FFB287-C79A-4476-AEDB-EE8DE80EB3B3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{FF1ABB6F-4A2C-48F4-B4DB-47DAD566D2F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FF1ABB6F-4A2C-48F4-B4DB-47DAD566D2F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FF1ABB6F-4A2C-48F4-B4DB-47DAD566D2F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{01FFB287-C79A-4476-AEDB-EE8DE80EB3B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01FFB287-C79A-4476-AEDB-EE8DE80EB3B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01FFB287-C79A-4476-AEDB-EE8DE80EB3B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01FFB287-C79A-4476-AEDB-EE8DE80EB3B3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

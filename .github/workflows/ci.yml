@@ -1,0 +1,22 @@
+name: .NET package CI
+
+on: [workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.2
+    - name: Install dependencies
+      run: msbuild -t:restore
+    - name: Build
+      run: msbuild -t:build
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.301
+    - name: Test
+      run: dotnet test --no-restore --no-build --verbosity normal

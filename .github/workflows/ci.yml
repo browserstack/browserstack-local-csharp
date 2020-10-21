@@ -2,6 +2,10 @@ name: .NET package CI
 
 on: [workflow_dispatch]
 
+defaults:
+  run:
+    working-directory: BrowserStackLocal
+
 jobs:
   build:
     runs-on: windows-latest
@@ -19,4 +23,6 @@ jobs:
       with:
         dotnet-version: 3.1.301
     - name: Test
-      run: dotnet test --no-restore --no-build --verbosity normal
+      env:
+        BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+      run: dotnet test --no-build

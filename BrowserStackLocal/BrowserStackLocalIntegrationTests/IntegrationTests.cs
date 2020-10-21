@@ -51,5 +51,14 @@ namespace BrowserStackLocalIntegrationTests
       local.stop();
       Assert.AreEqual(local.isRunning(), false);
     }
+
+    [TearDown]
+    public void TestCleanup()
+    {
+      foreach(Process p in Process.GetProcessesByName("BrowserStackLocal"))
+      {
+        p.Kill();
+      }
+    }
   }
 }

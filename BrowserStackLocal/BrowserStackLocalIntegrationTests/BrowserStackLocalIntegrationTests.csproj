@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>net45</TargetFramework>
-
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
@@ -11,6 +10,7 @@
     <PackageReference Include="NUnit3TestAdapter" Version="3.15.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.4.0" />
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.3" />
+    <PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
 
     <Reference Include="BrowserStackLocal">
       <HintPath>..\BrowserStackLocal\bin\Debug\net20\BrowserStackLocal.dll</HintPath>

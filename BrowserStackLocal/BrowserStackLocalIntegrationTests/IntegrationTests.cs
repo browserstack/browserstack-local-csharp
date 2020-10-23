@@ -16,7 +16,6 @@ namespace BrowserStackLocalIntegrationTests
 
     private List<KeyValuePair<string, string>> options = new List<KeyValuePair<string, string>>() {
       new KeyValuePair<string, string>("key", accesskey),
-      new KeyValuePair<string, string>("onlyAutomate", "true"),
       new KeyValuePair<string, string>("verbose", "true"),
       new KeyValuePair<string, string>("forcelocal", "true"),
       new KeyValuePair<string, string>("binarypath", "C:\\Users\\Admin\\Desktop\\BrowserStackLocal.exe"),

@@ -1,0 +1,40 @@
+name: .NET package CI
+
+on: [workflow_dispatch]
+
+defaults:
+  run:
+    working-directory: BrowserStackLocal
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.0.2
+    - name: Build BrowserStackLocal
+      run: |
+        msbuild BrowserStackLocal -t:restore -p:Configuration=Release
+        msbuild BrowserStackLocal -t:build -p:Configuration=Release
+    - name: Build Test project
+      run: |
+        msbuild BrowserStackLocalIntegrationTests -t:restore -p:Configuration=Release
+        msbuild BrowserStackLocalIntegrationTests -t:build -p:Configuration=Release
+    - name: Setup .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.301
+    - name: Run Integration Tests
+      env:
+        BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
+        BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+      run: dotnet test BrowserStackLocalIntegrationTests --no-build -p:Configuration=Release
+    - name: Pack NuGet Package
+      run: msbuild BrowserStackLocal -t:pack -p:Configuration=Release
+    - name: Save artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: BrowserStackLocal.nupkg
+        path: .\BrowserStackLocal\BrowserStackLocal\bin\Release\*.nupkg

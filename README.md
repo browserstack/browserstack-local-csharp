@@ -20,7 +20,7 @@ Local local = new Local();
 # replace <browserstack-accesskey> with your key. You can also set an environment variable - "BROWSERSTACK_ACCESS_KEY".
 List<KeyValuePair<string, string>> bsLocalArgs = new List<KeyValuePair<string, string>>() {
   new KeyValuePair<string, string>("key", "<browserstack-accesskey>"),
-}
+};
 
 # starts the Local instance with the required arguments
 local.start(bsLocalArgs);

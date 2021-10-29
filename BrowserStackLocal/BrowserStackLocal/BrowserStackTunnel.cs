@@ -137,7 +137,12 @@ namespace BrowserStack
       {
         if (e.Data != null)
         {
-          JObject binaryOutput = JObject.Parse(e.Data);
+          JObject binaryOutput = null;
+          try {
+            binaryOutput = JObject.Parse(e.Data);
+          } catch (Exception) {
+            throw new Exception($"Error while parsing JSON {e.Data}");
+          }
           if(binaryOutput.GetValue("state") != null && !binaryOutput.GetValue("state").ToString().ToLower().Equals("connected"))
           {
             throw new Exception("Eror while executing BrowserStackLocal " + processType + " " + e.Data);

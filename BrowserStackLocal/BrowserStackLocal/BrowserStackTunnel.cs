@@ -93,7 +93,7 @@ namespace BrowserStack
       string arguments = "-d " + processType + " ";
       if (folder != null && folder.Trim().Length != 0)
       {
-        arguments += "-f " + accessKey + " " + folder + " " + binaryArguments;
+                arguments += "-f " + accessKey + " " + folder + " " + binaryArguments + " --log-file C:\\agent\\_work\\r4\\a\\NZXWT.TestAutomation.UI\\drop\\TasksLocal\\TestResults\\log-file.log";
       }
       else
       {

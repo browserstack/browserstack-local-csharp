@@ -88,10 +88,27 @@ namespace BrowserStack
         throw new Exception("Error accessing file " + binaryAbsolute);
       }
 
-      DirectoryInfo dInfo = new DirectoryInfo(binaryAbsolute);
-      DirectorySecurity dSecurity = dInfo.GetAccessControl();
-      dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
-      dInfo.SetAccessControl(dSecurity);
+      if (os.Platform.ToString() == "Unix")
+       {
+        try
+        {
+          using (Process proc = Process.Start("/bin/bash", $"-c \"chmod 0755 {binaryAbsolute}\""))
+          {
+            proc.WaitForExit();
+          }
+        }
+        catch
+        {
+          throw new Exception("Error in changing permission for file " + binaryAbsolute);
+        }
+      }
+      else
+      {
+        DirectoryInfo dInfo = new DirectoryInfo(binaryAbsolute);
+        DirectorySecurity dSecurity = dInfo.GetAccessControl();
+        dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
+        dInfo.SetAccessControl(dSecurity);
+      }
     }
 
     public virtual void Run(string accessKey, string folder, string logFilePath, string processType)

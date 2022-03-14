@@ -14,12 +14,11 @@ namespace BrowserStack
 
   public class BrowserStackTunnel : IDisposable
   {
-    static readonly OperatingSystem os = Environment.OSVersion;
-    static readonly string binaryName = os.Platform.ToString() == "Unix" ? "BrowserStackLocal-darwin-x64" : "BrowserStackLocal.exe";
-    static readonly string downloadURL = os.Platform.ToString() == "Unix" ?
+    static readonly string binaryName = isDarwin() ? "BrowserStackLocal-darwin-x64" : "BrowserStackLocal.exe";
+    static readonly string downloadURL = isDarwin() ?
                                         "https://bstack-local-prod.s3.amazonaws.com/BrowserStackLocal-darwin-x64" :
                                         "https://bstack-local-prod.s3.amazonaws.com/BrowserStackLocal.exe";
-    static readonly string homepath = os.Platform.ToString() == "Unix" ?
+    static readonly string homepath = isDarwin() ?
                                         Environment.GetFolderPath(Environment.SpecialFolder.Personal) :
                                         Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
     public static readonly string[] basePaths = new string[] {
@@ -37,6 +36,12 @@ namespace BrowserStack
     protected FileSystemWatcher logfileWatcher;
 
     Process process = null;
+
+    static Boolean isDarwin()
+    {
+      OperatingSystem os = Environment.OSVersion;
+      return os.Platform.ToString() == "Unix";
+    }
 
     public virtual void addBinaryPath(string binaryAbsolute)
     {
@@ -71,6 +76,32 @@ namespace BrowserStack
       basePathsIndex++;
       binaryAbsolute = Path.Combine(basePaths[basePathsIndex], binaryName);
     }
+
+    public void modifyBinaryPermission()
+    {
+      if (isDarwin())
+       {
+        try
+        {
+          using (Process proc = Process.Start("/bin/bash", $"-c \"chmod 0755 {this.binaryAbsolute}\""))
+          {
+            proc.WaitForExit();
+          }
+        }
+        catch
+        {
+          throw new Exception("Error in changing permission for file " + this.binaryAbsolute);
+        }
+      }
+      else
+      {
+        DirectoryInfo dInfo = new DirectoryInfo(binaryAbsolute);
+        DirectorySecurity dSecurity = dInfo.GetAccessControl();
+        dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
+        dInfo.SetAccessControl(dSecurity);
+      }
+    }
+
     public void downloadBinary()
     {
       string binaryDirectory = Path.Combine(this.binaryAbsolute, "..");
@@ -88,27 +119,7 @@ namespace BrowserStack
         throw new Exception("Error accessing file " + binaryAbsolute);
       }
 
-      if (os.Platform.ToString() == "Unix")
-       {
-        try
-        {
-          using (Process proc = Process.Start("/bin/bash", $"-c \"chmod 0755 {binaryAbsolute}\""))
-          {
-            proc.WaitForExit();
-          }
-        }
-        catch
-        {
-          throw new Exception("Error in changing permission for file " + binaryAbsolute);
-        }
-      }
-      else
-      {
-        DirectoryInfo dInfo = new DirectoryInfo(binaryAbsolute);
-        DirectorySecurity dSecurity = dInfo.GetAccessControl();
-        dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
-        dInfo.SetAccessControl(dSecurity);
-      }
+      modifyBinaryPermission();
     }
 
     public virtual void Run(string accessKey, string folder, string logFilePath, string processType)

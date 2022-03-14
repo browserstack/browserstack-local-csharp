@@ -15,7 +15,7 @@ namespace BrowserStack
   public class BrowserStackTunnel : IDisposable
   {
     static readonly OperatingSystem os = Environment.OSVersion;
-    static readonly string binaryName = os.Platform.ToString() == "Unix" ? "BrowserStackLocal" : "BrowserStackLocal.exe";
+    static readonly string binaryName = os.Platform.ToString() == "Unix" ? "BrowserStackLocal-darwin-x64" : "BrowserStackLocal.exe";
     static readonly string downloadURL = os.Platform.ToString() == "Unix" ?
                                         "https://bstack-local-prod.s3.amazonaws.com/BrowserStackLocal-darwin-x64" :
                                         "https://bstack-local-prod.s3.amazonaws.com/BrowserStackLocal.exe";

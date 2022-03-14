@@ -14,10 +14,16 @@ namespace BrowserStack
 
   public class BrowserStackTunnel : IDisposable
   {
-    static readonly string binaryName = "BrowserStackLocal.exe";
-    static readonly string downloadURL = "https://s3.amazonaws.com/browserStack/browserstack-local/BrowserStackLocal.exe";
+    static readonly OperatingSystem os = Environment.OSVersion;
+    static readonly string binaryName = os.Platform.ToString() == "Unix" ? "BrowserStackLocal" : "BrowserStackLocal.exe";
+    static readonly string downloadURL = os.Platform.ToString() == "Unix" ?
+                                        "https://bstack-local-prod.s3.amazonaws.com/BrowserStackLocal-darwin-x64" :
+                                        "https://bstack-local-prod.s3.amazonaws.com/BrowserStackLocal.exe";
+    static readonly string homepath = os.Platform.ToString() == "Unix" ?
+                                        Environment.GetFolderPath(Environment.SpecialFolder.Personal) :
+                                        Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
     public static readonly string[] basePaths = new string[] {
-      Path.Combine(Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%"), ".browserstack"),
+      Path.Combine(homepath, ".browserstack"),
       Directory.GetCurrentDirectory(),
       Path.GetTempPath() };
 
@@ -60,7 +66,7 @@ namespace BrowserStack
     {
       if (basePathsIndex >= basePaths.Length - 1)
       {
-        throw new Exception("Binary not found or failed to launch. Make sure that BrowserStackLocal.exe is not already running.");
+        throw new Exception("Binary not found or failed to launch. Make sure that BrowserStackLocal is not already running.");
       }
       basePathsIndex++;
       binaryAbsolute = Path.Combine(basePaths[basePathsIndex], binaryName);

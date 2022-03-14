@@ -18,8 +18,6 @@ namespace BrowserStackLocalIntegrationTests
       new KeyValuePair<string, string>("key", accesskey),
       new KeyValuePair<string, string>("verbose", "true"),
       new KeyValuePair<string, string>("forcelocal", "true"),
-      new KeyValuePair<string, string>("binarypath", "C:\\Users\\Admin\\Desktop\\BrowserStackLocal.exe"),
-      new KeyValuePair<string, string>("logfile", "C:\\Users\\Admin\\Desktop\\local.log"),
     };
 
     [Test]

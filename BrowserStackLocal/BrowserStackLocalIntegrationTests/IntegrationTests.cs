@@ -12,7 +12,7 @@ namespace BrowserStackLocalIntegrationTests
   public class IntegrationTests
   {
     static readonly OperatingSystem os = Environment.OSVersion;
-    static readonly string binaryName = os.Platform.ToString() == "Unix" ? "BrowserStackLocal-darwin-x64" : "BrowserStackLocal.exe";
+    static readonly string binaryName = os.Platform.ToString() == "Unix" ? "BrowserStackLocal-darwin-x64" : "BrowserStackLocal";
     private static string username = Environment.GetEnvironmentVariable("BROWSERSTACK_USERNAME");
     private static string accesskey = Environment.GetEnvironmentVariable("BROWSERSTACK_ACCESS_KEY");
 

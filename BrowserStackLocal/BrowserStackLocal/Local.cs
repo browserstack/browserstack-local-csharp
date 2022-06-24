@@ -99,6 +99,7 @@ namespace BrowserStack
     }
     public void start(List<KeyValuePair<string, string>> options)
     {
+      tunnel.basePathsIndex = -1;
       foreach (KeyValuePair<string, string> pair in options)
       {
         string key = pair.Key;

@@ -113,6 +113,8 @@ namespace BrowserStack
       {
         File.WriteAllText(logFilePath, string.Empty);
       }
+      Console.WriteLine("Arguments: ");
+      Console.WriteLine(arguments);
       RunProcess(arguments, processType); 
     }
 

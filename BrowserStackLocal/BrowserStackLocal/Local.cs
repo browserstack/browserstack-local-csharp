@@ -92,7 +92,7 @@ namespace BrowserStack
         }
       }
     }
-    
+
     public Local()
     {
       tunnel = new BrowserStackTunnel();
@@ -111,7 +111,7 @@ namespace BrowserStack
         accessKey = Environment.GetEnvironmentVariable("BROWSERSTACK_ACCESS_KEY");
         if (accessKey == null || accessKey.Trim().Length == 0)
         {
-          throw new Exception("BROWSERSTACK_ACCESS_KEY cannot be empty. "+
+          throw new Exception("BROWSERSTACK_ACCESS_KEY cannot be empty. " +
             "Specify one by adding key to options or adding to the environment variable BROWSERSTACK_ACCESS_KEY.");
         }
         Regex.Replace(this.accessKey, @"\s+", "");
@@ -125,18 +125,27 @@ namespace BrowserStack
       argumentString += "-logFile \"" + customLogPath + "\" ";
       tunnel.addBinaryPath(customBinaryPath);
       tunnel.addBinaryArguments(argumentString);
-      while (true) {
+      while (true)
+      {
         bool except = false;
-        try {
+        try
+        {
           tunnel.Run(accessKey, folder, customLogPath, "start");
-        } catch (Exception)
+        }
+        catch (System.ComponentModel.Win32Exception)
         {
           except = true;
+        }
+        catch (Exception e)
+        {
+          except = true;
+          Console.WriteLine(e.ToString());
         }
         if (except)
         {
           tunnel.fallbackPaths();
-        } else
+        }
+        else
         {
           break;
         }

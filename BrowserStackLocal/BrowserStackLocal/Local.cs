@@ -125,6 +125,7 @@ namespace BrowserStack
        catch (Exception ex)
        {
           string m = ex.Message;
+          Console.Error.WriteLine(m);
        }
        return tMyAssembly;
     }

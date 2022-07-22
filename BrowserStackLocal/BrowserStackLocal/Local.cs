@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Reflection;
 
 namespace BrowserStack
 {
@@ -12,6 +13,8 @@ namespace BrowserStack
     private string customLogPath = "";
     private string argumentString = "";
     private string customBinaryPath = "";
+    private string bindingVersion = "";
+        
     protected BrowserStackTunnel tunnel = null;
     private static KeyValuePair<string, string> emptyStringPair = new KeyValuePair<string, string>();
 
@@ -63,7 +66,11 @@ namespace BrowserStack
       {
 
       }
-      else
+      else if (key.Equals("source"))
+      {
+
+      }
+    else
       {
         result = valueCommands.Find(pair => pair.Key == key);
         if (!result.Equals(emptyStringPair))
@@ -92,10 +99,51 @@ namespace BrowserStack
         }
       }
     }
-    
+    public static string GetVersionString(string pVersionString)
+    {
+      string tVersion = "Unknown";
+      string[] aVersion;
+
+      if (string.IsNullOrEmpty(pVersionString)) { return tVersion; }
+      aVersion = pVersionString.Split('.');
+      if (aVersion.Length > 0) { tVersion = aVersion[0]; }
+      if (aVersion.Length > 1) { tVersion += "." + aVersion[1]; }
+      if (aVersion.Length > 2) { tVersion += "." + aVersion[2].PadLeft(4, '0'); }
+      if (aVersion.Length > 3) { tVersion += "." + aVersion[3].PadLeft(4, '0'); }
+
+      return tVersion;
+    }
+    public static Assembly GetAssemblyEmbedded(string pAssemblyDisplayName)
+    {
+       Assembly tMyAssembly = null;
+
+       if (string.IsNullOrEmpty(pAssemblyDisplayName)) { return tMyAssembly; }
+       try 
+       {
+          tMyAssembly = Assembly.Load(pAssemblyDisplayName);
+       }
+       catch (Exception ex)
+       {
+          string m = ex.Message;
+          Console.Error.WriteLine(m);
+       }
+       return tMyAssembly;
+    }
+    public static string GetVersionStringFromAssemblyEmbedded(string pAssemblyDisplayName)
+    {
+       string tVersion = "Unknown";
+       Assembly tMyAssembly = null;
+
+       tMyAssembly = GetAssemblyEmbedded(pAssemblyDisplayName);
+       if (tMyAssembly == null) { return tVersion; }
+       tVersion = GetVersionString(tMyAssembly.GetName().Version.ToString());
+       return tVersion;
+    }
+
     public Local()
     {
-      tunnel = new BrowserStackTunnel();
+       bindingVersion = GetVersionStringFromAssemblyEmbedded("BrowserStackLocal");
+       tunnel = new BrowserStackTunnel();
     }
     public void start(List<KeyValuePair<string, string>> options)
     {
@@ -124,6 +172,7 @@ namespace BrowserStack
       }
 
       argumentString += "-logFile \"" + customLogPath + "\" ";
+      argumentString += "--source \"c-sharp:" + bindingVersion + "\" ";
       tunnel.addBinaryPath(customBinaryPath);
       tunnel.addBinaryArguments(argumentString);
       while (true) {

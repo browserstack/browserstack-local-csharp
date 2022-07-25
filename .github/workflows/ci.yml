@@ -54,6 +54,6 @@ jobs:
         Set-Content $pfxPath -Value $encodedBytes -AsByteStream;
         Write-Output "::set-output name=PFX_PATH::$pfxPath";
     - name: Sign Nuget Package
-      run: nuget sign .\BrowserStackLocal\BrowserStackLocal\bin\Release\*.nupkg -certificatePath "${{  steps.createPfx.outputs.PFX_PATH }}" -certificatePassword "${{secrets.CERT_PASSWORD}}"
+      run: nuget sign .\BrowserStackLocal\bin\Release\*.nupkg -certificatePath "${{  steps.createPfx.outputs.PFX_PATH }}" -certificatePassword "${{secrets.CERT_PASSWORD}}"
     - name: Push package to Nuget Repository
       run: nuget push **\*.nupkg -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{secrets.NUGET_API_KEY}}

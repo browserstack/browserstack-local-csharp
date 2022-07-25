@@ -33,11 +33,6 @@ jobs:
       run: dotnet test BrowserStackLocalIntegrationTests --no-build -p:Configuration=Release
     - name: Pack NuGet Package
       run: msbuild BrowserStackLocal -t:pack -p:Configuration=Release
-    - name: Save artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: BrowserStackLocal.nupkg
-        path: .\BrowserStackLocal\BrowserStackLocal\bin\Release\*.nupkg
     - name: Setup nuget
       uses: nuget/setup-nuget@v1
       with:
@@ -55,5 +50,10 @@ jobs:
         Write-Output "::set-output name=PFX_PATH::$pfxPath";
     - name: Sign Nuget Package
       run: nuget sign .\BrowserStackLocal\bin\Release\*.nupkg -certificatePath "${{  steps.createPfx.outputs.PFX_PATH }}" -certificatePassword "${{secrets.CERT_PASSWORD}}"
+    - name: Save artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: BrowserStackLocal.nupkg
+        path: .\BrowserStackLocal\BrowserStackLocal\bin\Release\*.nupkg
     - name: Push package to Nuget Repository
       run: nuget push **\*.nupkg -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{secrets.NUGET_API_KEY}}

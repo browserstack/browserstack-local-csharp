@@ -38,3 +38,10 @@ jobs:
       with:
         name: BrowserStackLocal.nupkg
         path: .\BrowserStackLocal\BrowserStackLocal\bin\Release\*.nupkg
+    - name: Setup nuget
+      uses: nuget/setup-nuget@v1
+      with:
+        nuget-api-key: ${{ secrets.NUGET_API_KEY }}
+        nuget-version: '5.x'
+    - name: Push package to Nuget Repository
+      run: nuget push **\*.nupkg -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{secrets.NUGET_API_KEY}}

@@ -44,15 +44,15 @@ jobs:
         nuget-api-key: ${{ secrets.NUGET_API_KEY }}
         nuget-version: '5.x'
     - name: Create PFX certificate
-    	id: create-pfx
-    	shell: pwsh
-    	env:
-      	PFX_CONTENT: ${{ secrets.BASE64_PFX_CONTENT }}
-    	run: |
-      	$pfxPath = Join-Path -Path $env:RUNNER_TEMP -ChildPath "cert.pfx";
-      	$encodedBytes = [System.Convert]::FromBase64String($env:PFX_CONTENT);
-      	Set-Content $pfxPath -Value $encodedBytes -AsByteStream;
-      	Write-Output "::set-output name=PFX_PATH::$pfxPath";
+      id: create-pfx
+      shell: pwsh
+      env:
+        PFX_CONTENT: ${{ secrets.BASE64_PFX_CONTENT }}
+      run: |
+        $pfxPath = Join-Path -Path $env:RUNNER_TEMP -ChildPath "cert.pfx";
+        $encodedBytes = [System.Convert]::FromBase64String($env:PFX_CONTENT);
+        Set-Content $pfxPath -Value $encodedBytes -AsByteStream;
+        Write-Output "::set-output name=PFX_PATH::$pfxPath";
     - name: Sign Nuget Package
       run: dotnet nuget sign .\BrowserStackLocal\BrowserStackLocal\bin\Release\*.nupkg --certificate-path "${{ env.PFX_PATH }}" --certificate-password "${{secrets.CERT_PASSWORD}}"
     - name: Push package to Nuget Repository

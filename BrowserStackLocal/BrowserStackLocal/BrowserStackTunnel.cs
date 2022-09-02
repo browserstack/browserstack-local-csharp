@@ -21,7 +21,7 @@ namespace BrowserStack
       Directory.GetCurrentDirectory(),
       Path.GetTempPath() };
 
-    int basePathsIndex = -1;
+    public int basePathsIndex = -1;
     protected string binaryAbsolute = "";
     protected string binaryArguments = "";
 

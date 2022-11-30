@@ -26,10 +26,10 @@ namespace BrowserStack
       Directory.GetCurrentDirectory(),
       Path.GetTempPath() };
 
-    int basePathsIndex = -1;
+    public int basePathsIndex = -1;
     protected string binaryAbsolute = "";
     protected string binaryArguments = "";
-    
+
     protected StringBuilder output;
     public LocalState localState;
     protected string logFilePath = "";
@@ -147,7 +147,7 @@ namespace BrowserStack
       {
         File.WriteAllText(logFilePath, string.Empty);
       }
-      RunProcess(arguments, processType); 
+      RunProcess(arguments, processType);
     }
 
     private void RunProcess(string arguments, string processType)
@@ -172,14 +172,40 @@ namespace BrowserStack
         if (e.Data != null)
         {
           JObject binaryOutput = null;
-          try {
+          try
+          {
             binaryOutput = JObject.Parse(e.Data);
-          } catch (Exception) {
+          }
+          catch (Exception)
+          {
+            SetTunnelState(LocalState.Error);
             throw new Exception($"Error while parsing JSON {e.Data}");
           }
-          if(binaryOutput.GetValue("state") != null && !binaryOutput.GetValue("state").ToString().ToLower().Equals("connected"))
+
+          JToken connectionState = binaryOutput.GetValue("state");
+          if (connectionState != null)
           {
-            throw new Exception("Eror while executing BrowserStackLocal " + processType + " " + e.Data);
+            if (connectionState.ToString().ToLower().Equals("connected"))
+            {
+              SetTunnelState(LocalState.Connected);
+            }
+            else if (connectionState.ToString().ToLower().Equals("disconnected"))
+            {
+              SetTunnelState(LocalState.Disconnected);
+            }
+            else
+            {
+              SetTunnelState(LocalState.Error);
+              throw new Exception("Error while executing BrowserStackLocal " + processType + " " + e.Data);
+            }
+          }
+          else
+          {
+            JToken message = binaryOutput.GetValue("message");
+            if (message != null && message.Type == JTokenType.String && message.ToString() == "BrowserStackLocal stopped successfully")
+            {
+              SetTunnelState(LocalState.Disconnected);
+            }
           }
         }
       });
@@ -196,13 +222,19 @@ namespace BrowserStack
       process.BeginOutputReadLine();
       process.BeginErrorReadLine();
 
-      TunnelStateChanged(LocalState.Idle, LocalState.Connecting);
-      AppDomain.CurrentDomain.ProcessExit += new EventHandler((s, e) => Kill());
+      SetTunnelState(LocalState.Connecting);
+      AppDomain.CurrentDomain.ProcessExit += new EventHandler((s, e) =>
+      {
+        Kill();
+      });
 
       process.WaitForExit();
     }
 
-    private void TunnelStateChanged(LocalState prevState, LocalState state) { }
+    private void SetTunnelState(LocalState newState)
+    {
+      localState = newState;
+    }
 
     public bool IsConnected()
     {
@@ -216,13 +248,13 @@ namespace BrowserStack
         process.Close();
         process.Kill();
         process = null;
-        localState = LocalState.Disconnected;
+        SetTunnelState(LocalState.Disconnected);
       }
     }
 
     public void Dispose()
     {
-      if(process != null)
+      if (process != null)
       {
         Kill();
       }

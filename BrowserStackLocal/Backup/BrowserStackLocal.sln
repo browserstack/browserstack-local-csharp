@@ -1,16 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.1.32414.318
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BrowserStackLocal", "BrowserStackLocal\BrowserStackLocal.csproj", "{F58E1C9A-5910-4DA8-B531-9F4A6B0AE8C8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrowserStackLocal", "BrowserStackLocal\BrowserStackLocal.csproj", "{F58E1C9A-5910-4DA8-B531-9F4A6B0AE8C8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BrowserStackLocal Unit Tests", "BrowserStackLocal Unit Tests\BrowserStackLocal Unit Tests.csproj", "{FF1ABB6F-4A2C-48F4-B4DB-47DAD566D2F9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrowserStackLocal Unit Tests", "BrowserStackLocal Unit Tests\BrowserStackLocal Unit Tests.csproj", "{FF1ABB6F-4A2C-48F4-B4DB-47DAD566D2F9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BrowserStackLocalIntegrationTests", "BrowserStackLocalIntegrationTests\BrowserStackLocalIntegrationTests.csproj", "{01FFB287-C79A-4476-AEDB-EE8DE80EB3B3}"
-	ProjectSection(ProjectDependencies) = postProject
-		{F58E1C9A-5910-4DA8-B531-9F4A6B0AE8C8} = {F58E1C9A-5910-4DA8-B531-9F4A6B0AE8C8}
-	EndProjectSection
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrowserStackLocalIntegrationTests", "BrowserStackLocalIntegrationTests\BrowserStackLocalIntegrationTests.csproj", "{01FFB287-C79A-4476-AEDB-EE8DE80EB3B3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,8 +30,5 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {3019DB30-CCF5-4543-B787-FCBBD97B21C8}
 	EndGlobalSection
 EndGlobal

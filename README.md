@@ -1,6 +1,6 @@
 # browserstack-local-csharp
 
-[![Build Status](https://travis-ci.org/browserstack/browserstack-local-csharp.svg?branch=master)](https://travis-ci.org/browserstack/browserstack-local-csharp)
+[![.NET package CI](https://github.com/browserstack/browserstack-local-csharp/actions/workflows/ci.yml/badge.svg)](https://github.com/browserstack/browserstack-local-csharp/actions/workflows/ci.yml)
 
 C# bindings for BrowserStack Local.
 

@@ -192,6 +192,7 @@ namespace BrowserStack
             else if (connectionState.ToString().ToLower().Equals("disconnected"))
             {
               SetTunnelState(LocalState.Disconnected);
+              throw new Exception("Error while executing BrowserStackLocal " + processType + " " + e.Data);
             }
             else
             {

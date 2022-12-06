@@ -11,6 +11,8 @@ namespace BrowserStackLocalIntegrationTests
 {
   public class IntegrationTests
   {
+    static readonly OperatingSystem os = Environment.OSVersion;
+    static readonly string binaryName = os.Platform.ToString() == "Unix" ? "BrowserStackLocal-darwin-x64" : "BrowserStackLocal";
     private static string username = Environment.GetEnvironmentVariable("BROWSERSTACK_USERNAME");
     private static string accesskey = Environment.GetEnvironmentVariable("BROWSERSTACK_ACCESS_KEY");
 
@@ -18,8 +20,6 @@ namespace BrowserStackLocalIntegrationTests
       new KeyValuePair<string, string>("key", accesskey),
       new KeyValuePair<string, string>("verbose", "true"),
       new KeyValuePair<string, string>("forcelocal", "true"),
-      new KeyValuePair<string, string>("binarypath", "C:\\Users\\Admin\\Desktop\\BrowserStackLocal.exe"),
-      new KeyValuePair<string, string>("logfile", "C:\\Users\\Admin\\Desktop\\local.log"),
     };
 
     [Test]
@@ -33,7 +33,7 @@ namespace BrowserStackLocalIntegrationTests
       }
 
       Assert.DoesNotThrow(new TestDelegate(startWithOptions));
-      Process[] binaryInstances = Process.GetProcessesByName("BrowserStackLocal");
+      Process[] binaryInstances = Process.GetProcessesByName(binaryName);
       Assert.AreNotEqual(binaryInstances.Length, 0);
 
       IWebDriver driver;
@@ -54,7 +54,7 @@ namespace BrowserStackLocalIntegrationTests
       driver.Quit();
       local.stop();
 
-      binaryInstances = Process.GetProcessesByName("BrowserStackLocal");
+      binaryInstances = Process.GetProcessesByName(binaryName);
       Assert.AreEqual(binaryInstances.Length, 0);
     }
 
@@ -76,7 +76,7 @@ namespace BrowserStackLocalIntegrationTests
     [TearDown]
     public void TestCleanup()
     {
-      foreach(Process p in Process.GetProcessesByName("BrowserStackLocal"))
+      foreach(Process p in Process.GetProcessesByName(binaryName))
       {
         p.Kill();
       }

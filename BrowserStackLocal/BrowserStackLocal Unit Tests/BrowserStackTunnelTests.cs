@@ -13,6 +13,11 @@ namespace BrowserStack_Unit_Tests
   [TestClass]
   public class BrowserStackTunnelTests
   {
+    static readonly OperatingSystem os = Environment.OSVersion;
+    static readonly string homepath = os.Platform.ToString() == "Unix" ?
+                                        Environment.GetFolderPath(Environment.SpecialFolder.Personal) :
+                                        Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
+    static readonly string binaryName = os.Platform.ToString() == "Unix" ? "BrowserStackLocal-darwin-x64" : "BrowserStackLocal.exe";
     private TunnelClass tunnel;
     [TestMethod]
     public void TestInitialState()
@@ -33,8 +38,8 @@ namespace BrowserStack_Unit_Tests
     {
       tunnel = new TunnelClass();
       tunnel.addBinaryPath(null);
-      string expectedPath = Path.Combine(Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%"), ".browserstack");
-      expectedPath = Path.Combine(expectedPath, "BrowserStackLocal.exe");
+      string expectedPath = Path.Combine(homepath, ".browserstack");
+      expectedPath = Path.Combine(expectedPath, binaryName);
       Assert.AreEqual(tunnel.getBinaryAbsolute(), expectedPath);
     }
     [TestMethod]
@@ -42,8 +47,8 @@ namespace BrowserStack_Unit_Tests
     {
       tunnel = new TunnelClass();
       tunnel.addBinaryPath("");
-      string expectedPath = Path.Combine(Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%"), ".browserstack");
-      expectedPath = Path.Combine(expectedPath, "BrowserStackLocal.exe");
+      string expectedPath = Path.Combine(homepath, ".browserstack");
+      expectedPath = Path.Combine(expectedPath, binaryName);
       Assert.AreEqual(tunnel.getBinaryAbsolute(), expectedPath);
     }
     [TestMethod]
@@ -55,18 +60,18 @@ namespace BrowserStack_Unit_Tests
       Assert.AreEqual(tunnel.getBinaryAbsolute(), expectedPath);
 
       tunnel.fallbackPaths();
-      expectedPath = Path.Combine(Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%"), ".browserstack");
-      expectedPath = Path.Combine(expectedPath, "BrowserStackLocal.exe");
+      expectedPath = Path.Combine(homepath, ".browserstack");
+      expectedPath = Path.Combine(expectedPath, binaryName);
       Assert.AreEqual(tunnel.getBinaryAbsolute(), expectedPath);
 
       tunnel.fallbackPaths();
       expectedPath = Directory.GetCurrentDirectory();
-      expectedPath = Path.Combine(expectedPath, "BrowserStackLocal.exe");
+      expectedPath = Path.Combine(expectedPath, binaryName);
       Assert.AreEqual(tunnel.getBinaryAbsolute(), expectedPath);
 
       tunnel.fallbackPaths();
       expectedPath = Path.GetTempPath();
-      expectedPath = Path.Combine(expectedPath, "BrowserStackLocal.exe");
+      expectedPath = Path.Combine(expectedPath, binaryName);
       Assert.AreEqual(tunnel.getBinaryAbsolute(), expectedPath);
     }
     [TestMethod]
@@ -79,7 +84,7 @@ namespace BrowserStack_Unit_Tests
       tunnel.fallbackPaths();
       Assert.Throws(typeof(Exception),
         new TestDelegate(testFallbackException),
-        "Binary not found or failed to launch. Make sure that BrowserStackLocal.exe is not already running."
+        "Binary not found or failed to launch. Make sure that BrowserStackLocal is not already running."
         );
     }
     [TestMethod]

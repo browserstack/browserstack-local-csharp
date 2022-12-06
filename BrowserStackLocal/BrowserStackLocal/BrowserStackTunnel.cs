@@ -14,10 +14,15 @@ namespace BrowserStack
 
   public class BrowserStackTunnel : IDisposable
   {
-    static readonly string binaryName = "BrowserStackLocal.exe";
-    static readonly string downloadURL = "https://s3.amazonaws.com/browserStack/browserstack-local/BrowserStackLocal.exe";
+    static readonly string binaryName = isDarwin() ? "BrowserStackLocal-darwin-x64" : "BrowserStackLocal.exe";
+    static readonly string downloadURL = isDarwin() ?
+                                        "https://bstack-local-prod.s3.amazonaws.com/BrowserStackLocal-darwin-x64" :
+                                        "https://bstack-local-prod.s3.amazonaws.com/BrowserStackLocal.exe";
+    static readonly string homepath = isDarwin() ?
+                                        Environment.GetFolderPath(Environment.SpecialFolder.Personal) :
+                                        Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
     public static readonly string[] basePaths = new string[] {
-      Path.Combine(Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%"), ".browserstack"),
+      Path.Combine(homepath, ".browserstack"),
       Directory.GetCurrentDirectory(),
       Path.GetTempPath() };
 
@@ -31,6 +36,12 @@ namespace BrowserStack
     protected FileSystemWatcher logfileWatcher;
 
     Process process = null;
+
+    static Boolean isDarwin()
+    {
+      OperatingSystem os = Environment.OSVersion;
+      return os.Platform.ToString() == "Unix";
+    }
 
     public virtual void addBinaryPath(string binaryAbsolute)
     {
@@ -60,11 +71,37 @@ namespace BrowserStack
     {
       if (basePathsIndex >= basePaths.Length - 1)
       {
-        throw new Exception("Binary not found or failed to launch. Make sure that BrowserStackLocal.exe is not already running.");
+        throw new Exception("Binary not found or failed to launch. Make sure that BrowserStackLocal is not already running.");
       }
       basePathsIndex++;
       binaryAbsolute = Path.Combine(basePaths[basePathsIndex], binaryName);
     }
+
+    public void modifyBinaryPermission()
+    {
+      if (isDarwin())
+       {
+        try
+        {
+          using (Process proc = Process.Start("/bin/bash", $"-c \"chmod 0755 {this.binaryAbsolute}\""))
+          {
+            proc.WaitForExit();
+          }
+        }
+        catch
+        {
+          throw new Exception("Error in changing permission for file " + this.binaryAbsolute);
+        }
+      }
+      else
+      {
+        DirectoryInfo dInfo = new DirectoryInfo(binaryAbsolute);
+        DirectorySecurity dSecurity = dInfo.GetAccessControl();
+        dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
+        dInfo.SetAccessControl(dSecurity);
+      }
+    }
+
     public void downloadBinary()
     {
       string binaryDirectory = Path.Combine(this.binaryAbsolute, "..");
@@ -82,10 +119,7 @@ namespace BrowserStack
         throw new Exception("Error accessing file " + binaryAbsolute);
       }
 
-      DirectoryInfo dInfo = new DirectoryInfo(binaryAbsolute);
-      DirectorySecurity dSecurity = dInfo.GetAccessControl();
-      dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
-      dInfo.SetAccessControl(dSecurity);
+      modifyBinaryPermission();
     }
 
     public virtual void Run(string accessKey, string folder, string logFilePath, string processType)
@@ -158,6 +192,7 @@ namespace BrowserStack
             else if (connectionState.ToString().ToLower().Equals("disconnected"))
             {
               SetTunnelState(LocalState.Disconnected);
+              throw new Exception("Error while executing BrowserStackLocal " + processType + " " + e.Data);
             }
             else
             {

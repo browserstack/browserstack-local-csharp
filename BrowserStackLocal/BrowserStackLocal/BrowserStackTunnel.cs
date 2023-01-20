@@ -14,11 +14,12 @@ namespace BrowserStack
 
   public class BrowserStackTunnel : IDisposable
   {
-    static readonly string binaryName = isDarwin() ? "BrowserStackLocal-darwin-x64" : "BrowserStackLocal.exe";
-    static readonly string downloadURL = isDarwin() ?
-                                        "https://bstack-local-prod.s3.amazonaws.com/BrowserStackLocal-darwin-x64" :
-                                        "https://bstack-local-prod.s3.amazonaws.com/BrowserStackLocal.exe";
-    static readonly string homepath = isDarwin() ?
+    private static readonly string baseDownloadUrl = "https://bstack-local-prod.s3.amazonaws.com/";
+    private static readonly string binaryName =
+      IsLinux() ? "BrowserStackLocal-linux-x64" : IsDarwin() ? "BrowserStackLocal-darwin-x64" : "BrowserStackLocal.exe";
+
+    private static readonly string downloadURL = baseDownloadUrl + binaryName;
+    static readonly string homepath = IsDarwin() || IsLinux() ?
                                         Environment.GetFolderPath(Environment.SpecialFolder.Personal) :
                                         Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
     public static readonly string[] basePaths = new string[] {
@@ -37,10 +38,16 @@ namespace BrowserStack
 
     Process process = null;
 
-    static Boolean isDarwin()
+    private static bool IsDarwin()
     {
       OperatingSystem os = Environment.OSVersion;
-      return os.Platform.ToString() == "Unix";
+      return os.Platform == PlatformID.MacOSX;
+    }
+
+    private static bool IsLinux()
+    {
+      OperatingSystem os = Environment.OSVersion;
+      return os.Platform == PlatformID.Unix;
     }
 
     public virtual void addBinaryPath(string binaryAbsolute)
@@ -79,7 +86,7 @@ namespace BrowserStack
 
     public void modifyBinaryPermission()
     {
-      if (isDarwin())
+      if (IsDarwin())
        {
         try
         {

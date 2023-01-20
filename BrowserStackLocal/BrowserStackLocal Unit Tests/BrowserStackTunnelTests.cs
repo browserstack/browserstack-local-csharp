@@ -14,10 +14,11 @@ namespace BrowserStack_Unit_Tests
   public class BrowserStackTunnelTests
   {
     static readonly OperatingSystem os = Environment.OSVersion;
-    static readonly string homepath = os.Platform.ToString() == "Unix" ?
+    static readonly string homepath = os.Platform == PlatformID.Unix ?
                                         Environment.GetFolderPath(Environment.SpecialFolder.Personal) :
                                         Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
-    static readonly string binaryName = os.Platform.ToString() == "Unix" ? "BrowserStackLocal-darwin-x64" : "BrowserStackLocal.exe";
+    static readonly string binaryName =
+      os.Platform == PlatformID.Unix ? "BrowserStackLocal-linux-x64" : os.Platform == PlatformID.MacOSX ? "BrowserStackLocal-darwin-x64" : "BrowserStackLocal.exe";
     private TunnelClass tunnel;
     [TestMethod]
     public void TestInitialState()

@@ -7,9 +7,9 @@
     <Title>BrowserStackLocal</Title>
     <Product>BrowserStackLocal</Product>
     <Description>C# Bindings for BrowserStack Local</Description>
-    <Version>2.2.0</Version>
-    <AssemblyVersion>2.2.0</AssemblyVersion>
-    <FileVersion>2.2.0</FileVersion>
+    <Version>2.3.0</Version>
+    <AssemblyVersion>2.3.0</AssemblyVersion>
+    <FileVersion>2.3.0</FileVersion>
     <Authors>BrowserStack</Authors>
     <Company>BrowserStack</Company>
     <Copyright>Copyright ©  2016</Copyright>

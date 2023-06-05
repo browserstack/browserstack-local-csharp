@@ -16,8 +16,8 @@ namespace BrowserStack
   {
     static readonly string binaryName = isDarwin() ? "BrowserStackLocal-darwin-x64" : "BrowserStackLocal.exe";
     static readonly string downloadURL = isDarwin() ?
-                                        "https://bstack-local-prod.s3.amazonaws.com/BrowserStackLocal-darwin-x64" :
-                                        "https://bstack-local-prod.s3.amazonaws.com/BrowserStackLocal.exe";
+                                        "https://www.browserstack.com/local-testing/downloads/binaries/BrowserStackLocal-darwin-x64" :
+                                        "https://www.browserstack.com/local-testing/downloads/binaries/BrowserStackLocal.exe";
     static readonly string homepath = isDarwin() ?
                                         Environment.GetFolderPath(Environment.SpecialFolder.Personal) :
                                         Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");

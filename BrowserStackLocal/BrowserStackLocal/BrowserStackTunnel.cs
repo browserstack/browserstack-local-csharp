@@ -7,6 +7,7 @@ using System.Net;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using Newtonsoft.Json.Linq;
+using System.Runtime.InteropServices;
 
 namespace BrowserStack
 {
@@ -14,6 +15,7 @@ namespace BrowserStack
 
   public class BrowserStackTunnel : IDisposable
   {
+    // Need to get rid of this variable, instead use getBinaryName()
     static readonly string binaryName = isDarwin() ? "BrowserStackLocal-darwin-x64" : "BrowserStackLocal.exe";
     static readonly string downloadURL = isDarwin() ?
                                         "https://www.browserstack.com/local-testing/downloads/binaries/BrowserStackLocal-darwin-x64" :
@@ -39,8 +41,77 @@ namespace BrowserStack
 
     static Boolean isDarwin()
     {
-      OperatingSystem os = Environment.OSVersion;
-      return os.Platform.ToString() == "Unix";
+      if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+      {
+        return true;
+      }
+    }
+
+    static Boolean isWindows()
+    {
+      if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+      {
+        return true;
+      }
+    }
+
+    static Boolean isLinux()
+    {
+      if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+      {
+        return true;
+      }
+    }
+
+    static Boolean isAlpine()
+    {
+      const string osReleaseFile = "/etc/os-release";
+
+      if (File.Exists(osReleaseFile))
+      {
+        string[] lines = File.ReadAllLines(osReleaseFile);
+        foreach (string line in lines)
+        {
+          if (line.StartsWith("ID="))
+          {
+            string id = line.Substring(3).Trim('"'); // Remove 'ID=' and quotes
+            if (id.Equals("alpine", StringComparison.OrdinalIgnoreCase))
+            {
+              return true;
+            }
+          }
+        }
+      }
+    }
+    static staring getBinaryName()
+    {
+      if isDarwin()
+      {
+        binaryName = "BrowserStackLocal-darwin-x64"
+      }
+      else if isWindows()
+      {
+        binaryName = "BrowserStackLocal.exe"
+      }
+      else if isLinux()
+      {
+        if (RuntimeInformation.OSArchitecture == Architecture.X64
+                           || RuntimeInformation.OSArchitecture == Architecture.Arm64)
+        {
+          if isAlpine()
+          {
+            binaryName = "BrowserStackLocal-alpine"
+          }
+          else
+          {
+            binaryName = "BrowserStackLocal-linux-x64"
+          }
+        }
+        else
+        {
+          binaryName = "BrowserStackLocal-linux-ia32"
+        }
+      }
     }
 
     public virtual void addBinaryPath(string binaryAbsolute)

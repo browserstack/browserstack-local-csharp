@@ -15,12 +15,9 @@ namespace BrowserStack
 
   public class BrowserStackTunnel : IDisposable
   {
-    // Need to get rid of this variable, instead use getBinaryName()
-    static readonly string binaryName = isDarwin() ? "BrowserStackLocal-darwin-x64" : "BrowserStackLocal.exe";
-    static readonly string downloadURL = isDarwin() ?
-                                        "https://www.browserstack.com/local-testing/downloads/binaries/BrowserStackLocal-darwin-x64" :
-                                        "https://www.browserstack.com/local-testing/downloads/binaries/BrowserStackLocal.exe";
-    static readonly string homepath = isDarwin() ?
+    static string binaryName = GetBinaryName();
+    static readonly string downloadURL = "https://www.browserstack.com/local-testing/downloads/binaries/" + binaryName;
+    static readonly string homepath = IsDarwin() || IsLinux() ?
                                         Environment.GetFolderPath(Environment.SpecialFolder.Personal) :
                                         Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
     public static readonly string[] basePaths = new string[] {
@@ -39,79 +36,80 @@ namespace BrowserStack
 
     Process process = null;
 
-    static Boolean isDarwin()
+    static bool IsDarwin()
     {
       if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
       {
         return true;
       }
+      return false;
     }
+    
 
-    static Boolean isWindows()
+    static bool IsWindows()
     {
       if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
       {
         return true;
       }
+      return false;
     }
 
-    static Boolean isLinux()
+    static bool IsLinux()
     {
-      if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+      if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
       {
         return true;
       }
+      return false;
     }
 
-    static Boolean isAlpine()
+    static bool IsAlpine()
     {
-      const string osReleaseFile = "/etc/os-release";
-
-      if (File.Exists(osReleaseFile))
+      try
       {
-        string[] lines = File.ReadAllLines(osReleaseFile);
-        foreach (string line in lines)
+        string[] output = Util.RunShellCommand("grep -w 'NAME' /etc/os-release");
+        if (string.IsNullOrEmpty(output[0]) && output[0].Contains("Alpine"))
         {
-          if (line.StartsWith("ID="))
-          {
-            string id = line.Substring(3).Trim('"'); // Remove 'ID=' and quotes
-            if (id.Equals("alpine", StringComparison.OrdinalIgnoreCase))
-            {
-              return true;
-            }
-          }
+          return true;
         }
       }
+      catch (System.Exception)
+      {
+        return false;
+      }
+      return false;
     }
-    static staring getBinaryName()
+
+    static string GetBinaryName()
     {
-      if isDarwin()
+      if (IsDarwin())
       {
-        binaryName = "BrowserStackLocal-darwin-x64"
+        return "BrowserStackLocal-darwin-x64";
       }
-      else if isWindows()
+      else if (IsWindows())
       {
-        binaryName = "BrowserStackLocal.exe"
+        return "BrowserStackLocal.exe";
       }
-      else if isLinux()
+      else if (IsLinux())
       {
-        if (RuntimeInformation.OSArchitecture == Architecture.X64
-                           || RuntimeInformation.OSArchitecture == Architecture.Arm64)
+        if (Environment.Is64BitOperatingSystem)
         {
-          if isAlpine()
+          if (IsAlpine())
           {
-            binaryName = "BrowserStackLocal-alpine"
+            return "BrowserStackLocal-alpine";
           }
           else
           {
-            binaryName = "BrowserStackLocal-linux-x64"
+            return "BrowserStackLocal-linux-x64";
           }
         }
         else
         {
-          binaryName = "BrowserStackLocal-linux-ia32"
+          return "BrowserStackLocal-linux-ia32";
         }
       }
+      return "BrowserStackLocal.exe";
     }
 
     public virtual void addBinaryPath(string binaryAbsolute)
@@ -150,7 +148,7 @@ namespace BrowserStack
 
     public void modifyBinaryPermission()
     {
-      if (isDarwin())
+      if (IsDarwin() || IsLinux())
        {
         try
         {

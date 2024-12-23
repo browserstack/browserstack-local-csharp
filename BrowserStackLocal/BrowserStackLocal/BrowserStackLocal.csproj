@@ -2,7 +2,7 @@
   <PropertyGroup>
     <RootNamespace>BrowserStack</RootNamespace>
     <AssemblyName>BrowserStackLocal</AssemblyName>
-    <TargetFrameworks>net20;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net48;netstandard2.0</TargetFrameworks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Title>BrowserStackLocal</Title>
     <Product>BrowserStackLocal</Product>

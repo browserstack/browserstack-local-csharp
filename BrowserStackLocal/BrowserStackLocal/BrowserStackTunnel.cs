@@ -7,7 +7,6 @@ using System.Net;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using Newtonsoft.Json.Linq;
-using System.Runtime.InteropServices;
 
 namespace BrowserStack
 {
@@ -15,9 +14,11 @@ namespace BrowserStack
 
   public class BrowserStackTunnel : IDisposable
   {
-    static string binaryName = GetBinaryName();
+    static readonly string uname = Util.GetUName();
+    static readonly string binaryName = GetBinaryName();
     static readonly string downloadURL = "https://www.browserstack.com/local-testing/downloads/binaries/" + binaryName;
-    static readonly string homepath = IsDarwin() || IsLinux() ?
+
+    static readonly string homepath = !IsWindows() ?
                                         Environment.GetFolderPath(Environment.SpecialFolder.Personal) :
                                         Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
     public static readonly string[] basePaths = new string[] {
@@ -36,9 +37,9 @@ namespace BrowserStack
 
     Process process = null;
 
-    static bool IsDarwin()
+    static bool IsDarwin(string osName)
     {
-      if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+      if(osName.Contains("darwin"))
       {
         return true;
       }
@@ -48,16 +49,16 @@ namespace BrowserStack
 
     static bool IsWindows()
     {
-      if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+      if (Environment.OSVersion.VersionString?.ToLower().Contains("windows") ?? false)
       {
         return true;
       }
       return false;
     }
 
-    static bool IsLinux()
+    static bool IsLinux(string osName)
     {
-      if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+      if(osName.Contains("linux"))
       {
         return true;
       }
@@ -69,7 +70,7 @@ namespace BrowserStack
       try
       {
         string[] output = Util.RunShellCommand("grep -w 'NAME' /etc/os-release");
-        if (string.IsNullOrEmpty(output[0]) && output[0].Contains("Alpine"))
+        if (output[0]?.ToLower()?.Contains("alpine") ?? false)
         {
           return true;
         }
@@ -83,17 +84,17 @@ namespace BrowserStack
 
     static string GetBinaryName()
     {
-      if (IsDarwin())
-      {
-        return "BrowserStackLocal-darwin-x64";
-      }
-      else if (IsWindows())
+      if (IsWindows())
       {
         return "BrowserStackLocal.exe";
       }
-      else if (IsLinux())
+      else if (IsDarwin(uname))
       {
-        if (Environment.Is64BitOperatingSystem)
+        return "BrowserStackLocal-darwin-x64";
+      }
+      else if (IsLinux(uname))
+      {
+        if (Util.Is64BitOS())
         {
           if (IsAlpine())
           {
@@ -148,7 +149,7 @@ namespace BrowserStack
 
     public void modifyBinaryPermission()
     {
-      if (IsDarwin() || IsLinux())
+      if (!IsWindows())
        {
         try
         {

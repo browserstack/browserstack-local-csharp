@@ -1,11 +1,21 @@
+using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace BrowserStack
 {
     public class Util {
 
+        [DllImport("kernel32.dll", SetLastError = true, CallingConvention = CallingConvention.Winapi)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool IsWow64Process(
+            [In] IntPtr hProcess,
+            [Out] out bool wow64Process
+        );
+
         // Only Unix Support
-        public static string[] RunShellCommand(string command) {
+        public static string[] RunShellCommand(string command)
+        {
             ProcessStartInfo psi = new ProcessStartInfo("bash", $"-c \"{command}\"") {
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -20,7 +30,45 @@ namespace BrowserStack
             process.WaitForExit();
             return new string[]{output, error};
         }
-        
+
+        public static string GetUName()
+        {
+            string osName = "";
+            try
+            {
+                string[] output = RunShellCommand("uname");
+                osName = output[0]?.ToLower();
+            }
+            catch (System.Exception) {}
+            return osName;
+        }
+
+        public static bool Is64BitOS()
+        {
+            bool is64BitProcess = IntPtr.Size == 8;
+            return is64BitProcess || InternalCheckIsWow64();
+        }
+
+        public static bool InternalCheckIsWow64()
+        {
+            if ((Environment.OSVersion.Version.Major == 5 && Environment.OSVersion.Version.Minor >= 1) ||
+                Environment.OSVersion.Version.Major >= 6)
+            {
+                using (Process p = Process.GetCurrentProcess())
+                {
+                    bool retVal;
+                    if (!IsWow64Process(p.Handle, out retVal))
+                    {
+                        return false;
+                    }
+                    return retVal;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
     }
 }
 

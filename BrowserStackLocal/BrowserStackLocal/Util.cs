@@ -6,6 +6,7 @@ namespace BrowserStack
 {
     public class Util {
 
+        // Ref: https://stackoverflow.com/a/336729
         [DllImport("kernel32.dll", SetLastError = true, CallingConvention = CallingConvention.Winapi)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool IsWow64Process(
@@ -45,6 +46,9 @@ namespace BrowserStack
 
         public static bool Is64BitOS()
         {
+            #if NET48_OR_GREATER || NETSTANDARD2_0_OR_GREATER || NETCOREAPP3_0_OR_GREATER
+                return Environment.Is64BitOperatingSystem;
+            #endif
             bool is64BitProcess = IntPtr.Size == 8;
             return is64BitProcess || InternalCheckIsWow64();
         }

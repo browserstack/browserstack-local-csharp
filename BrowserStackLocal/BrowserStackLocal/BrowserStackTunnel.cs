@@ -39,30 +39,18 @@ namespace BrowserStack
 
     static bool IsDarwin(string osName)
     {
-      if(osName.Contains("darwin"))
-      {
-        return true;
-      }
-      return false;
+      return osName.Contains("darwin");
     }
     
 
     static bool IsWindows()
     {
-      if (Environment.OSVersion.VersionString?.ToLower().Contains("windows") ?? false)
-      {
-        return true;
-      }
-      return false;
+      return Environment.OSVersion.VersionString?.ToLower().Contains("windows") ?? false;
     }
 
     static bool IsLinux(string osName)
     {
-      if(osName.Contains("linux"))
-      {
-        return true;
-      }
-      return false;
+      return osName.Contains("linux");
     }
 
     static bool IsAlpine()
@@ -70,16 +58,12 @@ namespace BrowserStack
       try
       {
         string[] output = Util.RunShellCommand("grep -w 'NAME' /etc/os-release");
-        if (output[0]?.ToLower()?.Contains("alpine") ?? false)
-        {
-          return true;
-        }
+        return output[0]?.ToLower()?.Contains("alpine") ?? false;
       }
       catch (System.Exception)
       {
         return false;
       }
-      return false;
     }
 
     static string GetBinaryName()

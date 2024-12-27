@@ -41,6 +41,8 @@ namespace BrowserStack
             #if NET48_OR_GREATER || NETSTANDARD2_0_OR_GREATER || NETCOREAPP3_0_OR_GREATER
                 return Environment.Is64BitOperatingSystem;
             #endif
+            // https://learn.microsoft.com/en-gb/dotnet/standard/choosing-core-framework-server?WT.mc_id=dotnet-35129-website
+            // linux won't be supported in .NET Framework and fallback to 64 bit
             return true;
         }
     }

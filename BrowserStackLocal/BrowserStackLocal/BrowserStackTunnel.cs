@@ -69,32 +69,18 @@ namespace BrowserStack
 
     static string GetBinaryName()
     {
-      if (IsWindows())
+      if (IsWindows()) return "BrowserStackLocal.exe";
+      if (IsDarwin(uname)) return "BrowserStackLocal-darwin-x64";
+
+      if (IsLinux(uname))
       {
-        return "BrowserStackLocal.exe";
-      }
-      else if (IsDarwin(uname))
-      {
-        return "BrowserStackLocal-darwin-x64";
-      }
-      else if (IsLinux(uname))
-      {
-        if (Util.Is64BitOS())
-        {
-          if (IsAlpine())
+          if (Util.Is64BitOS())
           {
-            return "BrowserStackLocal-alpine";
+            return IsAlpine() ? "BrowserStackLocal-alpine" : "BrowserStackLocal-linux-x64";
           }
-          else
-          {
-            return "BrowserStackLocal-linux-x64";
-          }
-        }
-        else
-        {
           return "BrowserStackLocal-linux-ia32";
-        }
       }
+
       return "BrowserStackLocal.exe";
     }
 

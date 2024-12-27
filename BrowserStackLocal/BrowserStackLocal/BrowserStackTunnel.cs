@@ -60,10 +60,11 @@ namespace BrowserStack
         string[] output = Util.RunShellCommand("grep -w 'NAME' /etc/os-release");
         return output[0]?.ToLower()?.Contains("alpine") ?? false;
       }
-      catch (System.Exception)
+      catch (System.Exception ex)
       {
-        return false;
+        Console.WriteLine("Exception while check isAlpine " + ex);
       }
+      return false;
     }
 
     static string GetBinaryName()

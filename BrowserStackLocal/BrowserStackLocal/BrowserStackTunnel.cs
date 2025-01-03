@@ -57,7 +57,7 @@ namespace BrowserStack
     {
       try
       {
-        string[] output = Util.RunShellCommand("grep", "-w 'NAME' /etc/os-release");
+        string[] output = Util.RunShellCommand("grep", "-w \'NAME\' /etc/os-release");
         return output[0]?.ToLower()?.Contains("alpine") ?? false;
       }
       catch (System.Exception ex)

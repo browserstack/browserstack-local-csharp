@@ -6,13 +6,15 @@ namespace BrowserStack
     public class Util {
 
         // Only Unix Support
-        public static string[] RunShellCommand(string command)
+        public static string[] RunShellCommand(string command, string args = "")
         {
-            ProcessStartInfo psi = new ProcessStartInfo("bash", $"-c \"{command}\"") {
+            ProcessStartInfo psi = new ProcessStartInfo {
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
-                CreateNoWindow = true
+                CreateNoWindow = true,
+                FileName = command,
+                Arguments = args
             };
 
             Process process = new Process { StartInfo = psi };

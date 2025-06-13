@@ -14,6 +14,9 @@ namespace BrowserStack
     private string argumentString = "";
     private string customBinaryPath = "";
     private string bindingVersion = "";
+    private string userAgent = "browserstack-local-csharp";
+    private bool isFallbackEnabled = false;
+    private Exception downloadFailureException = null;
         
     protected BrowserStackTunnel tunnel = null;
     private static KeyValuePair<string, string> emptyStringPair = new KeyValuePair<string, string>();
@@ -144,11 +147,11 @@ namespace BrowserStack
     public Local()
     {
        bindingVersion = GetVersionStringFromAssemblyEmbedded("BrowserStackLocal");
-       tunnel = new BrowserStackTunnel();
+       userAgent = userAgent + "/" + bindingVersion;
+       tunnel = new BrowserStackTunnel(userAgent);
     }
     public void start(List<KeyValuePair<string, string>> options)
     {
-      tunnel.basePathsIndex = -1;
       foreach (KeyValuePair<string, string> pair in options)
       {
         string key = pair.Key;
@@ -174,38 +177,61 @@ namespace BrowserStack
 
       argumentString += "-logFile \"" + customLogPath + "\" ";
       argumentString += "--source \"c-sharp:" + bindingVersion + "\" ";
-      tunnel.addBinaryPath(customBinaryPath);
       tunnel.addBinaryArguments(argumentString);
-      while (true)
+
+      DownloadVerifyAndRunBinary();
+    }
+
+    private void DownloadVerifyAndRunBinary()
+    {
+      tunnel.basePathsIndex = -1;
+      tunnel.addBinaryPath(customBinaryPath);
+      try
       {
-        bool except = false;
-        try
+        while (true)
         {
-          tunnel.Run(accessKey, folder, customLogPath, "start");
+          bool except = false;
+          try
+          {
+            tunnel.Run(accessKey, folder, customLogPath, "start", isFallbackEnabled, downloadFailureException);
+          }
+          catch (System.ComponentModel.Win32Exception)
+          {
+            except = true;
+          }
+          catch (Exception e)
+          {
+            except = true;
+            Console.WriteLine(e.ToString());
+          }
+          if (except)
+          {
+            tunnel.fallbackPaths();
+          }
+          else
+          {
+            break;
+          }
         }
-        catch (System.ComponentModel.Win32Exception)
+      }
+      catch (Exception err)
+      {
+        if (!isFallbackEnabled)
         {
-          except = true;
-        }
-        catch (Exception e)
-        {
-          except = true;
-          Console.WriteLine(e.ToString());
-        }
-        if (except)
-        {
-          tunnel.fallbackPaths();
+          isFallbackEnabled = true;
+          downloadFailureException = err;
+          downloadVerifyAndRunBinary();
         }
         else
         {
-          break;
+          throw err;
         }
       }
     }
 
     public void stop()
     {
-      tunnel.Run(accessKey, folder, customLogPath, "stop");
+      tunnel.Run(accessKey, folder, customLogPath, "stop", isFallbackEnabled, downloadFailureException);
       tunnel.Kill();
     }
   }

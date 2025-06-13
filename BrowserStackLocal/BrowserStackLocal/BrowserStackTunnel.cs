@@ -8,6 +8,12 @@ using System.Security.AccessControl;
 using System.Security.Principal;
 using Newtonsoft.Json.Linq;
 
+
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
+
 namespace BrowserStack
 {
   public enum LocalState { Idle, Connecting, Connected, Error, Disconnected };
@@ -16,7 +22,11 @@ namespace BrowserStack
   {
     static readonly string uname = Util.GetUName();
     static readonly string binaryName = GetBinaryName();
-    static readonly string downloadURL = "https://www.browserstack.com/local-testing/downloads/binaries/" + binaryName;
+
+    static readonly string userAgent = "";
+    static readonly string sourceUrl = null;
+    private bool isFallbackEnabled = false;
+    private Exception downloadFailureException = null;
 
     static readonly string homepath = !IsWindows() ?
                                         Environment.GetFolderPath(Environment.SpecialFolder.Personal) :
@@ -41,7 +51,7 @@ namespace BrowserStack
     {
       return osName.Contains("darwin");
     }
-    
+
 
     static bool IsWindows()
     {
@@ -102,8 +112,9 @@ namespace BrowserStack
       this.binaryArguments = binaryArguments;
     }
 
-    public BrowserStackTunnel()
+    public BrowserStackTunnel(string userAgent)
     {
+      userAgent = userAgent;
       localState = LocalState.Idle;
       output = new StringBuilder();
     }
@@ -121,7 +132,7 @@ namespace BrowserStack
     public void modifyBinaryPermission()
     {
       if (!IsWindows())
-       {
+      {
         try
         {
           using (Process proc = Process.Start("/bin/bash", $"-c \"chmod 0755 {this.binaryAbsolute}\""))
@@ -143,16 +154,59 @@ namespace BrowserStack
       }
     }
 
-    public void downloadBinary()
+    private string fetchSourceUrl(string accessKey)
+    {
+      var url = "https://local.browserstack.com/binary/api/v1/endpoint";
+
+      using (var client = new HttpClient())
+      {
+        var data = new Dictionary<string, object>
+        {
+            { "auth_token", accessKey }
+        };
+        client.DefaultRequestHeaders.Add("Content-Type", "application/json");
+        client.DefaultRequestHeaders.Add("user-agent", userAgent);
+
+        if (isFallbackEnabled)
+        {
+          data["error_message"] = downloadFailureException.Message;
+          client.DefaultRequestHeaders.Add("X-Local-Fallback-Cloudflare", "true");
+        }
+
+        string jsonData = JsonConvert.SerializeObject(data);
+        var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+
+        HttpResponseMessage response = await client.PostAsync(url, content);
+
+        response.EnsureSuccessStatusCode();
+
+        string responseString = await response.Content.ReadAsStringAsync();
+
+        dynamic jsonResponse = JsonConvert.DeserializeObject(responseString);
+
+        Console.WriteLine("Response JSON:");
+        Console.WriteLine(jsonResponse);
+
+        if (jsonResponse.error != null)
+        {
+          throw new Exception(jsonResponse.error);
+        }
+        return jsonResponse.data.endpoint;
+      }
+    }
+
+    public void downloadBinary(string accessKey)
     {
       string binaryDirectory = Path.Combine(this.binaryAbsolute, "..");
       //string binaryAbsolute = Path.Combine(binaryDirectory, binaryName);
+
+      string sourceDownloadUrl = fetchSourceUrl(accessKey);
 
       Directory.CreateDirectory(binaryDirectory);
 
       using (var client = new WebClient())
       {
-        client.DownloadFile(downloadURL, this.binaryAbsolute);
+        client.DownloadFile(sourceDownloadUrl + "/" + binaryName, this.binaryAbsolute);
       }
 
       if (!File.Exists(binaryAbsolute))
@@ -163,7 +217,7 @@ namespace BrowserStack
       modifyBinaryPermission();
     }
 
-    public virtual void Run(string accessKey, string folder, string logFilePath, string processType)
+    public virtual void Run(string accessKey, string folder, string logFilePath, string processType, bool fallbackEnabled, Exception failureException)
     {
       string arguments = "-d " + processType + " ";
       if (folder != null && folder.Trim().Length != 0)
@@ -176,7 +230,9 @@ namespace BrowserStack
       }
       if (!File.Exists(binaryAbsolute))
       {
-        downloadBinary();
+        isFallbackEnabled = fallbackEnabled;
+        downloadFailureException = failureException;
+        downloadBinary(accessKey);
       }
 
       if (process != null)

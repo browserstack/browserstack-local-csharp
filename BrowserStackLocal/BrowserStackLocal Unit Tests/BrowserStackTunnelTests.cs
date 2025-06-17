@@ -30,14 +30,14 @@ namespace BrowserStack_Unit_Tests
     public void TestBinaryPathIsSet()
     {
       tunnel = new TunnelClass();
-      tunnel.addBinaryPath("dummyPath");
+      tunnel.addBinaryPath("dummyPath", "");
       Assert.AreEqual(tunnel.getBinaryAbsolute(), "dummyPath");
     }
     [TestMethod]
     public void TestBinaryPathOnNull()
     {
       tunnel = new TunnelClass();
-      tunnel.addBinaryPath(null);
+      tunnel.addBinaryPath(null, "");
       string expectedPath = Path.Combine(homepath, ".browserstack");
       expectedPath = Path.Combine(expectedPath, binaryName);
       Assert.AreEqual(tunnel.getBinaryAbsolute(), expectedPath);
@@ -46,7 +46,7 @@ namespace BrowserStack_Unit_Tests
     public void TestBinaryPathOnEmpty()
     {
       tunnel = new TunnelClass();
-      tunnel.addBinaryPath("");
+      tunnel.addBinaryPath("", "");
       string expectedPath = Path.Combine(homepath, ".browserstack");
       expectedPath = Path.Combine(expectedPath, binaryName);
       Assert.AreEqual(tunnel.getBinaryAbsolute(), expectedPath);
@@ -56,7 +56,7 @@ namespace BrowserStack_Unit_Tests
     {
       string expectedPath = "dummyPath";
       tunnel = new TunnelClass();
-      tunnel.addBinaryPath("dummyPath");
+      tunnel.addBinaryPath("dummyPath", "");
       Assert.AreEqual(tunnel.getBinaryAbsolute(), expectedPath);
 
       tunnel.fallbackPaths();
@@ -78,7 +78,7 @@ namespace BrowserStack_Unit_Tests
     public void TestBinaryPathOnNoMoreFallback()
     {
       tunnel = new TunnelClass();
-      tunnel.addBinaryPath("dummyPath");
+      tunnel.addBinaryPath("dummyPath", "");
       tunnel.fallbackPaths();
       tunnel.fallbackPaths();
       tunnel.fallbackPaths();

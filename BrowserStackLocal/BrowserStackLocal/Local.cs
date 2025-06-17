@@ -150,6 +150,54 @@ namespace BrowserStack
        userAgent = userAgent + "/" + bindingVersion;
        tunnel = new BrowserStackTunnel(userAgent);
     }
+
+    private void DownloadVerifyAndRunBinary()
+    {
+      tunnel.basePathsIndex = -1;
+      tunnel.addBinaryPath(customBinaryPath, accessKey, isFallbackEnabled, downloadFailureException);
+      try
+      {
+        while (true)
+        {
+          bool except = false;
+          try
+          {
+            tunnel.Run(accessKey, folder, customLogPath, "start");
+          }
+          catch (System.ComponentModel.Win32Exception)
+          {
+            except = true;
+          }
+          catch (Exception e)
+          {
+            except = true;
+            Console.WriteLine(e.ToString());
+          }
+          if (except)
+          {
+            tunnel.fallbackPaths();
+          }
+          else
+          {
+            break;
+          }
+        }
+      }
+      catch (Exception err)
+      {
+        if (!isFallbackEnabled)
+        {
+          isFallbackEnabled = true;
+          downloadFailureException = err;
+          DownloadVerifyAndRunBinary();
+        }
+        else
+        {
+          throw err;
+        }
+      }
+    }
+
     public void start(List<KeyValuePair<string, string>> options)
     {
       foreach (KeyValuePair<string, string> pair in options)
@@ -182,56 +230,9 @@ namespace BrowserStack
       DownloadVerifyAndRunBinary();
     }
 
-    private void DownloadVerifyAndRunBinary()
-    {
-      tunnel.basePathsIndex = -1;
-      tunnel.addBinaryPath(customBinaryPath);
-      try
-      {
-        while (true)
-        {
-          bool except = false;
-          try
-          {
-            tunnel.Run(accessKey, folder, customLogPath, "start", isFallbackEnabled, downloadFailureException);
-          }
-          catch (System.ComponentModel.Win32Exception)
-          {
-            except = true;
-          }
-          catch (Exception e)
-          {
-            except = true;
-            Console.WriteLine(e.ToString());
-          }
-          if (except)
-          {
-            tunnel.fallbackPaths();
-          }
-          else
-          {
-            break;
-          }
-        }
-      }
-      catch (Exception err)
-      {
-        if (!isFallbackEnabled)
-        {
-          isFallbackEnabled = true;
-          downloadFailureException = err;
-          downloadVerifyAndRunBinary();
-        }
-        else
-        {
-          throw err;
-        }
-      }
-    }
-
     public void stop()
     {
-      tunnel.Run(accessKey, folder, customLogPath, "stop", isFallbackEnabled, downloadFailureException);
+      tunnel.Run(accessKey, folder, customLogPath, "stop");
       tunnel.Kill();
     }
   }

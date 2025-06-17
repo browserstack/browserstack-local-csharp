@@ -23,8 +23,8 @@ namespace BrowserStack
     static readonly string uname = Util.GetUName();
     static readonly string binaryName = GetBinaryName();
 
-    static readonly string userAgent = "";
-    static readonly string sourceUrl = null;
+    private static string userAgent = "";
+    private string sourceUrl = null;
     private bool isFallbackEnabled = false;
     private Exception downloadFailureException = null;
 
@@ -94,8 +94,15 @@ namespace BrowserStack
       return "BrowserStackLocal.exe";
     }
 
-    public virtual void addBinaryPath(string binaryAbsolute)
+    public virtual void addBinaryPath(string binaryAbsolute, string accessKey, bool fallbackEnabled = false, Exception failureException = null)
     {
+      if (basePathsIndex == -1)
+      {
+        /* Called at most twice (primary & a fallback) */
+        isFallbackEnabled = fallbackEnabled;
+        downloadFailureException = failureException;
+        fetchSourceUrl(accessKey);
+      }
       if (binaryAbsolute == null || binaryAbsolute.Trim().Length == 0)
       {
         binaryAbsolute = Path.Combine(basePaths[++basePathsIndex], binaryName);
@@ -112,15 +119,19 @@ namespace BrowserStack
       this.binaryArguments = binaryArguments;
     }
 
-    public BrowserStackTunnel(string userAgent)
+    public BrowserStackTunnel(string userAgentParam)
     {
-      userAgent = userAgent;
+      userAgent = userAgentParam;
       localState = LocalState.Idle;
       output = new StringBuilder();
     }
 
     public virtual void fallbackPaths()
     {
+      if (File.Exists(binaryAbsolute))
+      {
+        File.Delete(binaryAbsolute);
+      }
       if (basePathsIndex >= basePaths.Length - 1)
       {
         throw new Exception("Binary not found or failed to launch. Make sure that BrowserStackLocal is not already running.");
@@ -164,49 +175,48 @@ namespace BrowserStack
         {
             { "auth_token", accessKey }
         };
-        client.DefaultRequestHeaders.Add("Content-Type", "application/json");
-        client.DefaultRequestHeaders.Add("user-agent", userAgent);
 
         if (isFallbackEnabled)
         {
           data["error_message"] = downloadFailureException.Message;
-          client.DefaultRequestHeaders.Add("X-Local-Fallback-Cloudflare", "true");
         }
 
-        string jsonData = JsonConvert.SerializeObject(data);
+        var jsonData = JsonConvert.SerializeObject(data);
         var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
 
-        HttpResponseMessage response = await client.PostAsync(url, content);
+        client.DefaultRequestHeaders.Add("User-Agent", userAgent);
+        if (isFallbackEnabled)
+        {
+            client.DefaultRequestHeaders.Add("X-Local-Fallback-Cloudflare", "true");
+        }
+
+        var response = client.PostAsync(url, content).Result;
 
         response.EnsureSuccessStatusCode();
 
-        string responseString = await response.Content.ReadAsStringAsync();
+        var responseString = response.Content.ReadAsStringAsync().Result;
 
-        dynamic jsonResponse = JsonConvert.DeserializeObject(responseString);
+        var jsonResponse = JObject.Parse(responseString);
 
-        Console.WriteLine("Response JSON:");
-        Console.WriteLine(jsonResponse);
-
-        if (jsonResponse.error != null)
+        if (jsonResponse["error"] != null)
         {
-          throw new Exception(jsonResponse.error);
+          throw new Exception((string)jsonResponse["error"]);
         }
-        return jsonResponse.data.endpoint;
+        
+        sourceUrl = jsonResponse["data"]?["endpoint"]?.ToString();
+        return sourceUrl;
       }
     }
 
     public void downloadBinary(string accessKey)
     {
       string binaryDirectory = Path.Combine(this.binaryAbsolute, "..");
-      //string binaryAbsolute = Path.Combine(binaryDirectory, binaryName);
-
-      string sourceDownloadUrl = fetchSourceUrl(accessKey);
 
       Directory.CreateDirectory(binaryDirectory);
 
       using (var client = new WebClient())
       {
-        client.DownloadFile(sourceDownloadUrl + "/" + binaryName, this.binaryAbsolute);
+        client.DownloadFile(sourceUrl + "/" + binaryName, this.binaryAbsolute);
       }
 
       if (!File.Exists(binaryAbsolute))
@@ -217,7 +227,7 @@ namespace BrowserStack
       modifyBinaryPermission();
     }
 
-    public virtual void Run(string accessKey, string folder, string logFilePath, string processType, bool fallbackEnabled, Exception failureException)
+    public virtual void Run(string accessKey, string folder, string logFilePath, string processType)
     {
       string arguments = "-d " + processType + " ";
       if (folder != null && folder.Trim().Length != 0)
@@ -230,8 +240,6 @@ namespace BrowserStack
       }
       if (!File.Exists(binaryAbsolute))
       {
-        isFallbackEnabled = fallbackEnabled;
-        downloadFailureException = failureException;
         downloadBinary(accessKey);
       }
 

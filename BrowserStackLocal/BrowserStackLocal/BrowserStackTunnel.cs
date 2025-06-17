@@ -208,7 +208,7 @@ namespace BrowserStack
       }
     }
 
-    public void downloadBinary(string accessKey)
+    public void downloadBinary()
     {
       string binaryDirectory = Path.Combine(this.binaryAbsolute, "..");
 
@@ -240,7 +240,7 @@ namespace BrowserStack
       }
       if (!File.Exists(binaryAbsolute))
       {
-        downloadBinary(accessKey);
+        downloadBinary();
       }
 
       if (process != null)

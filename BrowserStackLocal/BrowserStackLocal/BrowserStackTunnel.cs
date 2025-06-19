@@ -8,6 +8,12 @@ using System.Security.AccessControl;
 using System.Security.Principal;
 using Newtonsoft.Json.Linq;
 
+
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
+
 namespace BrowserStack
 {
   public enum LocalState { Idle, Connecting, Connected, Error, Disconnected };
@@ -16,7 +22,11 @@ namespace BrowserStack
   {
     static readonly string uname = Util.GetUName();
     static readonly string binaryName = GetBinaryName();
-    static readonly string downloadURL = "https://www.browserstack.com/local-testing/downloads/binaries/" + binaryName;
+
+    private static string userAgent = "";
+    private string sourceUrl = null;
+    private bool isFallbackEnabled = false;
+    private Exception downloadFailureException = null;
 
     static readonly string homepath = !IsWindows() ?
                                         Environment.GetFolderPath(Environment.SpecialFolder.Personal) :
@@ -41,7 +51,7 @@ namespace BrowserStack
     {
       return osName.Contains("darwin");
     }
-    
+
 
     static bool IsWindows()
     {
@@ -84,8 +94,15 @@ namespace BrowserStack
       return "BrowserStackLocal.exe";
     }
 
-    public virtual void addBinaryPath(string binaryAbsolute)
+    public virtual void addBinaryPath(string binaryAbsolute, string accessKey, bool fallbackEnabled = false, Exception failureException = null)
     {
+      if (basePathsIndex == -1)
+      {
+        /* Called at most twice (primary & a fallback) */
+        isFallbackEnabled = fallbackEnabled;
+        downloadFailureException = failureException;
+        fetchSourceUrl(accessKey);
+      }
       if (binaryAbsolute == null || binaryAbsolute.Trim().Length == 0)
       {
         binaryAbsolute = Path.Combine(basePaths[++basePathsIndex], binaryName);
@@ -102,14 +119,19 @@ namespace BrowserStack
       this.binaryArguments = binaryArguments;
     }
 
-    public BrowserStackTunnel()
+    public BrowserStackTunnel(string userAgentParam)
     {
+      userAgent = userAgentParam;
       localState = LocalState.Idle;
       output = new StringBuilder();
     }
 
     public virtual void fallbackPaths()
     {
+      if (File.Exists(binaryAbsolute))
+      {
+        File.Delete(binaryAbsolute);
+      }
       if (basePathsIndex >= basePaths.Length - 1)
       {
         throw new Exception("Binary not found or failed to launch. Make sure that BrowserStackLocal is not already running.");
@@ -121,7 +143,7 @@ namespace BrowserStack
     public void modifyBinaryPermission()
     {
       if (!IsWindows())
-       {
+      {
         try
         {
           using (Process proc = Process.Start("/bin/bash", $"-c \"chmod 0755 {this.binaryAbsolute}\""))
@@ -143,16 +165,58 @@ namespace BrowserStack
       }
     }
 
+    private string fetchSourceUrl(string accessKey)
+    {
+      var url = "https://local.browserstack.com/binary/api/v1/endpoint";
+
+      using (var client = new HttpClient())
+      {
+        var data = new Dictionary<string, object>
+        {
+            { "auth_token", accessKey }
+        };
+
+        if (isFallbackEnabled)
+        {
+          data["error_message"] = downloadFailureException.Message;
+        }
+
+        var jsonData = JsonConvert.SerializeObject(data);
+        var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+
+        client.DefaultRequestHeaders.Add("User-Agent", userAgent);
+        if (isFallbackEnabled)
+        {
+            client.DefaultRequestHeaders.Add("X-Local-Fallback-Cloudflare", "true");
+        }
+
+        var response = client.PostAsync(url, content).Result;
+
+        response.EnsureSuccessStatusCode();
+
+        var responseString = response.Content.ReadAsStringAsync().Result;
+
+        var jsonResponse = JObject.Parse(responseString);
+
+        if (jsonResponse["error"] != null)
+        {
+          throw new Exception((string)jsonResponse["error"]);
+        }
+        
+        sourceUrl = jsonResponse["data"]?["endpoint"]?.ToString();
+        return sourceUrl;
+      }
+    }
+
     public void downloadBinary()
     {
       string binaryDirectory = Path.Combine(this.binaryAbsolute, "..");
-      //string binaryAbsolute = Path.Combine(binaryDirectory, binaryName);
 
       Directory.CreateDirectory(binaryDirectory);
 
       using (var client = new WebClient())
       {
-        client.DownloadFile(downloadURL, this.binaryAbsolute);
+        client.DownloadFile(sourceUrl + "/" + binaryName, this.binaryAbsolute);
       }
 
       if (!File.Exists(binaryAbsolute))

@@ -14,6 +14,9 @@ namespace BrowserStack
     private string argumentString = "";
     private string customBinaryPath = "";
     private string bindingVersion = "";
+    private string userAgent = "browserstack-local-csharp";
+    private bool isFallbackEnabled = false;
+    private Exception downloadFailureException = null;
         
     protected BrowserStackTunnel tunnel = null;
     private static KeyValuePair<string, string> emptyStringPair = new KeyValuePair<string, string>();
@@ -144,11 +147,59 @@ namespace BrowserStack
     public Local()
     {
        bindingVersion = GetVersionStringFromAssemblyEmbedded("BrowserStackLocal");
-       tunnel = new BrowserStackTunnel();
+       userAgent = userAgent + "/" + bindingVersion;
+       tunnel = new BrowserStackTunnel(userAgent);
     }
-    public void start(List<KeyValuePair<string, string>> options)
+
+    private void DownloadVerifyAndRunBinary()
     {
       tunnel.basePathsIndex = -1;
+      tunnel.addBinaryPath(customBinaryPath, accessKey, isFallbackEnabled, downloadFailureException);
+      try
+      {
+        while (true)
+        {
+          bool except = false;
+          try
+          {
+            tunnel.Run(accessKey, folder, customLogPath, "start");
+          }
+          catch (System.ComponentModel.Win32Exception)
+          {
+            except = true;
+          }
+          catch (Exception e)
+          {
+            except = true;
+            Console.WriteLine(e.ToString());
+          }
+          if (except)
+          {
+            tunnel.fallbackPaths();
+          }
+          else
+          {
+            break;
+          }
+        }
+      }
+      catch (Exception err)
+      {
+        if (!isFallbackEnabled)
+        {
+          isFallbackEnabled = true;
+          downloadFailureException = err;
+          DownloadVerifyAndRunBinary();
+        }
+        else
+        {
+          throw err;
+        }
+      }
+    }
+
+    public void start(List<KeyValuePair<string, string>> options)
+    {
       foreach (KeyValuePair<string, string> pair in options)
       {
         string key = pair.Key;
@@ -174,33 +225,9 @@ namespace BrowserStack
 
       argumentString += "-logFile \"" + customLogPath + "\" ";
       argumentString += "--source \"c-sharp:" + bindingVersion + "\" ";
-      tunnel.addBinaryPath(customBinaryPath);
       tunnel.addBinaryArguments(argumentString);
-      while (true)
-      {
-        bool except = false;
-        try
-        {
-          tunnel.Run(accessKey, folder, customLogPath, "start");
-        }
-        catch (System.ComponentModel.Win32Exception)
-        {
-          except = true;
-        }
-        catch (Exception e)
-        {
-          except = true;
-          Console.WriteLine(e.ToString());
-        }
-        if (except)
-        {
-          tunnel.fallbackPaths();
-        }
-        else
-        {
-          break;
-        }
-      }
+
+      DownloadVerifyAndRunBinary();
     }
 
     public void stop()

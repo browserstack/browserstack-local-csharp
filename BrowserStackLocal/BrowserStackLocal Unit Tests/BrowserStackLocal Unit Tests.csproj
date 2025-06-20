@@ -2,7 +2,7 @@
   <PropertyGroup>
     <RootNamespace>BrowserStackLocal_Unit_Tests</RootNamespace>
     <AssemblyName>BrowserStackLocal Unit Tests</AssemblyName>
-    <TargetFrameworks>net45;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>net7.0</TargetFrameworks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Title>BrowserStackLocal Unit Tests</Title>
     <Product>BrowserStackLocal Unit Tests</Product>
@@ -18,15 +18,10 @@
     <PackageReference Include="NUnit3TestAdapter" Version="3.15.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.4.0" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net7.0' ">
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.3" />
     <Reference Include="BrowserStackLocal">
-      <HintPath>..\BrowserStackLocal\bin\Debug\net20\BrowserStackLocal.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp3.1' ">
-    <Reference Include="BrowserStackLocal">
-      <HintPath>..\BrowserStackLocal\bin\Debug\netstandard2.0\BrowserStackLocal.dll</HintPath>
+      <HintPath>..\BrowserStackLocal\bin\$(Configuration)\net7.0\BrowserStackLocal.dll</HintPath>
     </Reference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

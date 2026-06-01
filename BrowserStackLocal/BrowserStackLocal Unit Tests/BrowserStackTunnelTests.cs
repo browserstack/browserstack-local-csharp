@@ -17,7 +17,7 @@ namespace BrowserStack_Unit_Tests
     static readonly string homepath = os.Platform.ToString() == "Unix" ?
                                         Environment.GetFolderPath(Environment.SpecialFolder.Personal) :
                                         Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
-    static readonly string binaryName = os.Platform.ToString() == "Unix" ? "BrowserStackLocal-darwin-x64" : "BrowserStackLocal.exe";
+    static readonly string binaryName = BrowserStackTunnel.GetBinaryName();
     private TunnelClass tunnel;
     [TestMethod]
     public void TestInitialState()

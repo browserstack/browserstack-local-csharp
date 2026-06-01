@@ -12,6 +12,7 @@ using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 using Newtonsoft.Json;
 
 namespace BrowserStack
@@ -27,6 +28,8 @@ namespace BrowserStack
     private string sourceUrl = null;
     private bool isFallbackEnabled = false;
     private Exception downloadFailureException = null;
+    private string proxyHost = null;
+    private int proxyPort = 0;
 
     static readonly string homepath = !IsWindows() ?
                                         Environment.GetFolderPath(Environment.SpecialFolder.Personal) :
@@ -77,13 +80,14 @@ namespace BrowserStack
       return false;
     }
 
-    static string GetBinaryName()
+    public static string GetBinaryName()
     {
       if (IsWindows()) return "BrowserStackLocal.exe";
       if (IsDarwin(uname)) return "BrowserStackLocal-darwin-x64";
 
       if (IsLinux(uname))
       {
+          if (IsArm64()) return "BrowserStackLocal-linux-arm64";
           if (Util.Is64BitOS())
           {
             return IsAlpine() ? "BrowserStackLocal-alpine" : "BrowserStackLocal-linux-x64";
@@ -92,6 +96,17 @@ namespace BrowserStack
       }
 
       return "BrowserStackLocal.exe";
+    }
+
+    static bool IsArm64()
+    {
+      return RuntimeInformation.OSArchitecture == Architecture.Arm64;
+    }
+
+    public virtual void SetProxy(string host, int port)
+    {
+      proxyHost = host;
+      proxyPort = port;
     }
 
     public virtual void addBinaryPath(string binaryAbsolute, string accessKey, bool fallbackEnabled = false, Exception failureException = null)
@@ -169,7 +184,14 @@ namespace BrowserStack
     {
       var url = "https://local.browserstack.com/binary/api/v1/endpoint";
 
-      using (var client = new HttpClient())
+      HttpClientHandler handler = new HttpClientHandler();
+      if (!string.IsNullOrEmpty(proxyHost) && proxyPort > 0)
+      {
+        handler.Proxy = new WebProxy(proxyHost, proxyPort);
+        handler.UseProxy = true;
+      }
+
+      using (var client = new HttpClient(handler))
       {
         var data = new Dictionary<string, object>
         {
@@ -216,6 +238,10 @@ namespace BrowserStack
 
       using (var client = new WebClient())
       {
+        if (!string.IsNullOrEmpty(proxyHost) && proxyPort > 0)
+        {
+          client.Proxy = new WebProxy(proxyHost, proxyPort);
+        }
         client.DownloadFile(sourceUrl + "/" + binaryName, this.binaryAbsolute);
       }
 

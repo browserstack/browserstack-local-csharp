@@ -37,7 +37,7 @@ namespace BrowserStack_Unit_Tests
       options.Add(new KeyValuePair<string, string>("key", ""));
       local = new LocalClass();
 
-      Mock<BrowserStackTunnel> tunnelMock = new Mock<BrowserStackTunnel>();
+      Mock<BrowserStackTunnel> tunnelMock = new Mock<BrowserStackTunnel>("test-user-agent");
       tunnelMock.Setup(mock => mock.Run("", "", logAbsolute, "start"));
       local.setTunnel(tunnelMock.Object);
 
@@ -53,7 +53,7 @@ namespace BrowserStack_Unit_Tests
       options = new List<KeyValuePair<string, string>>();
       options.Add(new KeyValuePair<string, string>("key", "dummyKey"));
       local = new LocalClass();
-      Mock<BrowserStackTunnel> tunnelMock = new Mock<BrowserStackTunnel>();
+      Mock<BrowserStackTunnel> tunnelMock = new Mock<BrowserStackTunnel>("test-user-agent");
       local.setTunnel(tunnelMock.Object);
       Assert.DoesNotThrow(new TestDelegate(startWithOptions),
         "BROWSERSTACK_ACCESS_KEY cannot be empty. Specify one by adding key to options or adding to the environment variable BROWSERSTACK_ACCESS_KEY.");
@@ -68,7 +68,7 @@ namespace BrowserStack_Unit_Tests
       Environment.SetEnvironmentVariable("BROWSERSTACK_ACCESS_KEY", "envDummyKey");
       options = new List<KeyValuePair<string, string>>();
       local = new LocalClass();
-      Mock<BrowserStackTunnel> tunnelMock = new Mock<BrowserStackTunnel>();
+      Mock<BrowserStackTunnel> tunnelMock = new Mock<BrowserStackTunnel>("test-user-agent");
       tunnelMock.Setup(mock => mock.Run("envDummyKey", "", logAbsolute, "start"));
       local.setTunnel(tunnelMock.Object);
       Assert.DoesNotThrow(new TestDelegate(startWithOptions),
@@ -86,7 +86,7 @@ namespace BrowserStack_Unit_Tests
       options.Add(new KeyValuePair<string, string>("f", "dummyFolderPath"));
 
       local = new LocalClass();
-      Mock<BrowserStackTunnel> tunnelMock = new Mock<BrowserStackTunnel>();
+      Mock<BrowserStackTunnel> tunnelMock = new Mock<BrowserStackTunnel>("test-user-agent");
       tunnelMock.Setup(mock => mock.Run("dummyKey", "dummyFolderPath", logAbsolute, "start"));
       local.setTunnel(tunnelMock.Object);
       local.start(options);
@@ -103,11 +103,11 @@ namespace BrowserStack_Unit_Tests
       options.Add(new KeyValuePair<string, string>("binarypath", "dummyPath"));
 
       local = new LocalClass();
-      Mock<BrowserStackTunnel> tunnelMock = new Mock<BrowserStackTunnel>();
+      Mock<BrowserStackTunnel> tunnelMock = new Mock<BrowserStackTunnel>("test-user-agent");
       tunnelMock.Setup(mock => mock.Run("dummyKey", "", logAbsolute, "start"));
       local.setTunnel(tunnelMock.Object);
       local.start(options);
-      tunnelMock.Verify(mock => mock.addBinaryPath("dummyPath", ""), Times.Once);
+      tunnelMock.Verify(mock => mock.addBinaryPath("dummyPath", "", It.IsAny<bool>(), It.IsAny<Exception>()), Times.Once);
       tunnelMock.Verify(mock => mock.addBinaryArguments(It.IsRegex("-logFile \"" + logAbsolute + "\" .*")), Times.Once());
       tunnelMock.Verify(mock => mock.Run("dummyKey", "", logAbsolute, "start"), Times.Once());
       local.stop();
@@ -125,11 +125,11 @@ namespace BrowserStack_Unit_Tests
       options.Add(new KeyValuePair<string, string>("onlyAutomate", "true"));
 
       local = new LocalClass();
-      Mock<BrowserStackTunnel> tunnelMock = new Mock<BrowserStackTunnel>();
+      Mock<BrowserStackTunnel> tunnelMock = new Mock<BrowserStackTunnel>("test-user-agent");
       tunnelMock.Setup(mock => mock.Run("dummyKey", "", logAbsolute, "start"));
       local.setTunnel(tunnelMock.Object);
       local.start(options);
-      tunnelMock.Verify(mock => mock.addBinaryPath("", ""), Times.Once);
+      tunnelMock.Verify(mock => mock.addBinaryPath("", "", It.IsAny<bool>(), It.IsAny<Exception>()), Times.Once);
       tunnelMock.Verify(mock => mock.addBinaryArguments(It.IsRegex("-vvv.*-force.*-forcelocal.*-forceproxy.*-onlyAutomate.*")), Times.Once());
       tunnelMock.Verify(mock => mock.Run("dummyKey", "", logAbsolute, "start"), Times.Once());
       local.stop();
@@ -148,11 +148,11 @@ namespace BrowserStack_Unit_Tests
       options.Add(new KeyValuePair<string, string>("proxyPass", "dummyPass"));
 
       local = new LocalClass();
-      Mock<BrowserStackTunnel> tunnelMock = new Mock<BrowserStackTunnel>();
+      Mock<BrowserStackTunnel> tunnelMock = new Mock<BrowserStackTunnel>("test-user-agent");
       tunnelMock.Setup(mock =>mock.Run("dummyKey", "", logAbsolute, "start"));
       local.setTunnel(tunnelMock.Object);
       local.start(options);
-      tunnelMock.Verify(mock => mock.addBinaryPath("", ""), Times.Once);
+      tunnelMock.Verify(mock => mock.addBinaryPath("", "", It.IsAny<bool>(), It.IsAny<Exception>()), Times.Once);
       tunnelMock.Verify(mock => mock.addBinaryArguments(
         It.IsRegex("-localIdentifier.*dummyIdentifier.*dummyHost.*-proxyHost.*dummyHost.*-proxyPort.*dummyPort.*-proxyUser.*dummyUser.*-proxyPass.*dummyPass.*")
         ), Times.Once());
@@ -171,11 +171,11 @@ namespace BrowserStack_Unit_Tests
       options.Add(new KeyValuePair<string, string>("customKey2", "customValue2"));
       
       local = new LocalClass();
-      Mock<BrowserStackTunnel> tunnelMock = new Mock<BrowserStackTunnel>();
+      Mock<BrowserStackTunnel> tunnelMock = new Mock<BrowserStackTunnel>("test-user-agent");
       tunnelMock.Setup(mock => mock.Run("dummyKey", "", logAbsolute, "start"));
       local.setTunnel(tunnelMock.Object);
       local.start(options);
-      tunnelMock.Verify(mock => mock.addBinaryPath("", ""), Times.Once);
+      tunnelMock.Verify(mock => mock.addBinaryPath("", "", It.IsAny<bool>(), It.IsAny<Exception>()), Times.Once);
       tunnelMock.Verify(mock => mock.addBinaryArguments(
         It.IsRegex("-customBoolKey1.*-customBoolKey2.*-customKey1.*customValue1.*-customKey2.*customValue2.*")
         ), Times.Once());
@@ -191,7 +191,7 @@ namespace BrowserStack_Unit_Tests
 
       local = new LocalClass();
       int count = 0;
-      Mock<BrowserStackTunnel> tunnelMock = new Mock<BrowserStackTunnel>();
+      Mock<BrowserStackTunnel> tunnelMock = new Mock<BrowserStackTunnel>("test-user-agent");
       tunnelMock.Setup(mock => mock.Run("dummyKey", "", logAbsolute, "start")).Callback(() =>
       {
         count++;
@@ -200,7 +200,7 @@ namespace BrowserStack_Unit_Tests
       });
       local.setTunnel(tunnelMock.Object);
       local.start(options);
-      tunnelMock.Verify(mock => mock.addBinaryPath("", ""), Times.Once);
+      tunnelMock.Verify(mock => mock.addBinaryPath("", "", It.IsAny<bool>(), It.IsAny<Exception>()), Times.Once);
       tunnelMock.Verify(mock => mock.addBinaryArguments(It.IsRegex("-logFile \"" + logAbsolute + "\" .*")), Times.Once());
       tunnelMock.Verify(mock => mock.Run("dummyKey", "", logAbsolute, "start"), Times.Exactly(2));
       tunnelMock.Verify(mock => mock.fallbackPaths(), Times.Once());
@@ -214,14 +214,63 @@ namespace BrowserStack_Unit_Tests
       options.Add(new KeyValuePair<string, string>("key", "dummyKey"));
 
       local = new LocalClass();
-      Mock<BrowserStackTunnel> tunnelMock = new Mock<BrowserStackTunnel>();
+      Mock<BrowserStackTunnel> tunnelMock = new Mock<BrowserStackTunnel>("test-user-agent");
       tunnelMock.Setup(mock => mock.Run("dummyKey", "", logAbsolute, "start"));
       local.setTunnel(tunnelMock.Object);
       local.start(options);
       local.stop();
-      tunnelMock.Verify(mock => mock.addBinaryPath("", ""), Times.Once);
+      tunnelMock.Verify(mock => mock.addBinaryPath("", "", It.IsAny<bool>(), It.IsAny<Exception>()), Times.Once);
       tunnelMock.Verify(mock => mock.addBinaryArguments(It.IsRegex("-logFile \"" + logAbsolute + "\" .*")), Times.Once());
       tunnelMock.Verify(mock => mock.Run("dummyKey", "", logAbsolute, "start"), Times.Once());
+    }
+
+    [TestMethod]
+    public void TestSetProxyCalledWithProxyOptions()
+    {
+      options = new List<KeyValuePair<string, string>>();
+      options.Add(new KeyValuePair<string, string>("key", "dummyKey"));
+      options.Add(new KeyValuePair<string, string>("proxyHost", "proxy.example.com"));
+      options.Add(new KeyValuePair<string, string>("proxyPort", "8080"));
+
+      local = new LocalClass();
+      Mock<BrowserStackTunnel> tunnelMock = new Mock<BrowserStackTunnel>("test-user-agent");
+      tunnelMock.Setup(mock => mock.Run("dummyKey", "", logAbsolute, "start"));
+      local.setTunnel(tunnelMock.Object);
+      local.start(options);
+      tunnelMock.Verify(mock => mock.SetProxy("proxy.example.com", 8080), Times.Once);
+      local.stop();
+    }
+
+    [TestMethod]
+    public void TestSetProxyCalledWithDefaultsWhenAbsent()
+    {
+      options = new List<KeyValuePair<string, string>>();
+      options.Add(new KeyValuePair<string, string>("key", "dummyKey"));
+
+      local = new LocalClass();
+      Mock<BrowserStackTunnel> tunnelMock = new Mock<BrowserStackTunnel>("test-user-agent");
+      tunnelMock.Setup(mock => mock.Run("dummyKey", "", logAbsolute, "start"));
+      local.setTunnel(tunnelMock.Object);
+      local.start(options);
+      tunnelMock.Verify(mock => mock.SetProxy(null, 0), Times.Once);
+      local.stop();
+    }
+
+    [TestMethod]
+    public void TestSetProxyIgnoresInvalidPort()
+    {
+      options = new List<KeyValuePair<string, string>>();
+      options.Add(new KeyValuePair<string, string>("key", "dummyKey"));
+      options.Add(new KeyValuePair<string, string>("proxyHost", "proxy.example.com"));
+      options.Add(new KeyValuePair<string, string>("proxyPort", "not-a-number"));
+
+      local = new LocalClass();
+      Mock<BrowserStackTunnel> tunnelMock = new Mock<BrowserStackTunnel>("test-user-agent");
+      tunnelMock.Setup(mock => mock.Run("dummyKey", "", logAbsolute, "start"));
+      local.setTunnel(tunnelMock.Object);
+      local.start(options);
+      tunnelMock.Verify(mock => mock.SetProxy("proxy.example.com", 0), Times.Once);
+      local.stop();
     }
 
     public void startWithOptions()

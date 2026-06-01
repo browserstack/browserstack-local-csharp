@@ -103,12 +103,36 @@ namespace BrowserStack_Unit_Tests
     }
 
 
+    [TestMethod]
+    public void TestGetBinaryNameReturnsKnownPlatformBinary()
+    {
+      string result = BrowserStackTunnel.GetBinaryName();
+      string[] knownBinaries = new[] {
+        "BrowserStackLocal.exe",
+        "BrowserStackLocal-darwin-x64",
+        "BrowserStackLocal-linux-x64",
+        "BrowserStackLocal-linux-ia32",
+        "BrowserStackLocal-linux-arm64",
+        "BrowserStackLocal-alpine"
+      };
+      Assert.Contains(result, knownBinaries);
+    }
+
+    [TestMethod]
+    public void TestSetProxyAcceptsHostAndPort()
+    {
+      tunnel = new TunnelClass();
+      Assert.DoesNotThrow(() => tunnel.SetProxy("proxy.example.com", 8080));
+      Assert.DoesNotThrow(() => tunnel.SetProxy(null, 0));
+    }
+
     public void testFallbackException()
     {
       tunnel.fallbackPaths();
     }
     public class TunnelClass : BrowserStackTunnel
     {
+      public TunnelClass() : base("test-user-agent") {}
       public StringBuilder getOutputBuilder()
       {
         return output;

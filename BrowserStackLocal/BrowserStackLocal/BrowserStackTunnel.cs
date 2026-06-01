@@ -28,6 +28,10 @@ namespace BrowserStack
     private string sourceUrl = null;
     private bool isFallbackEnabled = false;
     private Exception downloadFailureException = null;
+
+    // Set via SetProxy(...) before fetchSourceUrl / downloadBinary; otherwise the
+    // binary download bypasses the user's proxy even when -proxyHost is passed
+    // through to the running binary via argumentString.
     private string proxyHost = null;
     private int proxyPort = 0;
 

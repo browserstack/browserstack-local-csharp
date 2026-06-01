@@ -83,7 +83,10 @@ namespace BrowserStack
         }
         else if (key.Equals("proxyPort"))
         {
-          int.TryParse(value, out proxyPort);
+          if (!int.TryParse(value, out proxyPort))
+          {
+            Console.Error.WriteLine($"Invalid proxyPort '{value}'; ignoring proxy for binary download");
+          }
         }
 
         result = valueCommands.Find(pair => pair.Key == key);

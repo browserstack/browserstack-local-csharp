@@ -2,7 +2,7 @@
   <PropertyGroup>
     <RootNamespace>BrowserStack</RootNamespace>
     <AssemblyName>BrowserStackLocal</AssemblyName>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Title>BrowserStackLocal</Title>
     <Product>BrowserStackLocal</Product>

@@ -242,6 +242,7 @@ namespace BrowserStack
 
       using (var client = new WebClient())
       {
+        client.Headers.Add(HttpRequestHeader.UserAgent, userAgent);
         if (!string.IsNullOrEmpty(proxyHost) && proxyPort > 0)
         {
           client.Proxy = new WebProxy(proxyHost, proxyPort);

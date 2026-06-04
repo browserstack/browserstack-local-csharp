@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net7.0</TargetFrameworks>
+    <TargetFrameworks>net6.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
@@ -12,10 +12,10 @@
     <PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net7.0' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.3" />
     <Reference Include="BrowserStackLocal">
-      <HintPath>..\BrowserStackLocal\bin\$(Configuration)\net7.0\BrowserStackLocal.dll</HintPath>
+      <HintPath>..\BrowserStackLocal\bin\$(Configuration)\net6.0\BrowserStackLocal.dll</HintPath>
     </Reference>
   </ItemGroup>
 

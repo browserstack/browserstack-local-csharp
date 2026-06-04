@@ -2,14 +2,14 @@
   <PropertyGroup>
     <RootNamespace>BrowserStack</RootNamespace>
     <AssemblyName>BrowserStackLocal</AssemblyName>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Title>BrowserStackLocal</Title>
     <Product>BrowserStackLocal</Product>
     <Description>C# Bindings for BrowserStack Local</Description>
-    <Version>3.0.0</Version>
-    <AssemblyVersion>3.0.0</AssemblyVersion>
-    <FileVersion>3.0.0</FileVersion>
+    <Version>3.1.0</Version>
+    <AssemblyVersion>3.1.0</AssemblyVersion>
+    <FileVersion>3.1.0</FileVersion>
     <Authors>BrowserStack</Authors>
     <Company>BrowserStack</Company>
     <Copyright>Copyright ©  2016</Copyright>

@@ -17,6 +17,8 @@ namespace BrowserStack
     private string userAgent = "browserstack-local-csharp";
     private bool isFallbackEnabled = false;
     private Exception downloadFailureException = null;
+    private string proxyHost = null;
+    private int proxyPort = 0;
         
     protected BrowserStackTunnel tunnel = null;
     private static KeyValuePair<string, string> emptyStringPair = new KeyValuePair<string, string>();
@@ -75,6 +77,18 @@ namespace BrowserStack
       }
     else
       {
+        if (key.Equals("proxyHost"))
+        {
+          proxyHost = value;
+        }
+        else if (key.Equals("proxyPort"))
+        {
+          if (!int.TryParse(value, out proxyPort))
+          {
+            Console.Error.WriteLine($"Invalid proxyPort '{value}'; ignoring proxy for binary download");
+          }
+        }
+
         result = valueCommands.Find(pair => pair.Key == key);
         if (!result.Equals(emptyStringPair))
         {
@@ -226,6 +240,7 @@ namespace BrowserStack
       argumentString += "-logFile \"" + customLogPath + "\" ";
       argumentString += "--source \"c-sharp:" + bindingVersion + "\" ";
       tunnel.addBinaryArguments(argumentString);
+      tunnel.SetProxy(proxyHost, proxyPort);
 
       DownloadVerifyAndRunBinary();
     }

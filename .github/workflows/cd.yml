@@ -26,6 +26,24 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 6.0.x
+    - name: Setup GCP credentials
+      working-directory: ${{ github.workspace }}
+      run: |
+        printf '%s' "$GCP_SA_KEY_RAW" > $RUNNER_TEMP/gcp-sa-key.json
+        chmod 600 $RUNNER_TEMP/gcp-sa-key.json
+        echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/gcp-sa-key.json" >> $GITHUB_ENV
+      env:
+        GCP_SA_KEY_RAW: ${{ secrets.GCP_SA_KEY }}
+      shell: bash
+    - name: Install google-auth
+      working-directory: ${{ github.workspace }}
+      run: python3 -m pip install google-auth requests
+      shell: bash
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
     - name: Run Integration Tests
       env:
         BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
@@ -33,27 +51,25 @@ jobs:
       run: dotnet test BrowserStackLocalIntegrationTests --no-build -p:Configuration=Release
     - name: Pack NuGet Package
       run: msbuild BrowserStackLocal -t:pack -p:Configuration=Release
-    - name: Setup nuget
-      uses: nuget/setup-nuget@v1
-      with:
-        nuget-api-key: ${{ secrets.NUGET_API_KEY }}
-        nuget-version: '5.x'
-    - name: Create PFX certificate
-      id: createPfx
-      shell: pwsh
-      env:
-        PFX_CONTENT: ${{ secrets.BASE64_PFX_CONTENT }}
-      run: |
-        $pfxPath = Join-Path -Path $env:RUNNER_TEMP -ChildPath "cert.pfx";
-        $encodedBytes = [System.Convert]::FromBase64String($env:PFX_CONTENT);
-        Set-Content $pfxPath -Value $encodedBytes -AsByteStream;
-        Write-Output "::set-output name=PFX_PATH::$pfxPath";
     - name: Sign Nuget Package
-      run: nuget sign .\BrowserStackLocal\bin\Release\*.nupkg -certificatePath "${{  steps.createPfx.outputs.PFX_PATH }}" -certificatePassword "${{secrets.CERT_PASSWORD}}" -Timestamper "http://timestamp.comodoca.com"
+      working-directory: ${{ github.workspace }}
+      run: |
+        chmod +x ./scripts/sign_nupkg.sh
+        ./scripts/sign_nupkg.sh
+      shell: bash
     - name: Save artifact
       uses: actions/upload-artifact@v4
       with:
         name: BrowserStackLocal.nupkg
         path: .\BrowserStackLocal\BrowserStackLocal\bin\Release\*.nupkg
     - name: Push package to Nuget Repository
-      run: nuget push **\*.nupkg -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{secrets.NUGET_API_KEY}}
+      working-directory: ${{ github.workspace }}
+      run: dotnet nuget push BrowserStackLocal/BrowserStackLocal/bin/Release/*.nupkg --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json
+      env:
+        NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+      shell: bash
+    - name: Cleanup credentials
+      if: always()
+      working-directory: ${{ github.workspace }}
+      run: rm -f $RUNNER_TEMP/gcp-sa-key.json
+      shell: bash

@@ -21,6 +21,9 @@ namespace BrowserStack
 
   public class BrowserStackTunnel : IDisposable
   {
+    private static readonly string[] AllowedDownloadHosts = new string[] { "browserstack.com" };
+    private static readonly string[] AllowedDownloadHostSuffixes = new string[] { ".browserstack.com" };
+
     static readonly string uname = Util.GetUName();
     static readonly string binaryName = GetBinaryName();
 
@@ -229,9 +232,41 @@ namespace BrowserStack
           throw new Exception((string)jsonResponse["error"]);
         }
         
-        sourceUrl = jsonResponse["data"]?["endpoint"]?.ToString();
+        sourceUrl = ValidateSourceUrl(jsonResponse["data"]?["endpoint"]?.ToString());
         return sourceUrl;
       }
+    }
+
+    private static string ValidateSourceUrl(string url)
+    {
+      if (string.IsNullOrEmpty(url))
+      {
+        throw new Exception("Refusing binary download: empty source URL");
+      }
+      Uri parsed;
+      if (!Uri.TryCreate(url, UriKind.Absolute, out parsed))
+      {
+        throw new Exception("Refusing binary download: malformed source URL");
+      }
+      if (!string.Equals(parsed.Scheme, "https", StringComparison.OrdinalIgnoreCase))
+      {
+        throw new Exception("Refusing binary download from non-HTTPS source URL");
+      }
+      string host = parsed.Host;
+      if (string.IsNullOrEmpty(host))
+      {
+        throw new Exception("Refusing binary download: source URL has no host");
+      }
+      host = host.ToLowerInvariant();
+      foreach (var allowed in AllowedDownloadHosts)
+      {
+        if (host.Equals(allowed)) return url;
+      }
+      foreach (var suffix in AllowedDownloadHostSuffixes)
+      {
+        if (host.EndsWith(suffix)) return url;
+      }
+      throw new Exception("Refusing binary download: host '" + host + "' is not in the allowed host list");
     }
 
     public void downloadBinary()

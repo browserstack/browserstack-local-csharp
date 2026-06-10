@@ -237,6 +237,11 @@ namespace BrowserStack
       }
     }
 
+    // Each guard below covers a case the final host-equals check does not:
+    //   - null/empty URL: skip a parse attempt and give a clear error.
+    //   - Uri.TryCreate failure: malformed URL surfaces our own exception instead of leaving parsed null.
+    //   - HTTPS check: allowlist matches host only; without this, http://browserstack.com would pass.
+    //   - null/empty host: parsed.Host can be empty for some URL forms; give a clear error before reaching the allowlist loop.
     private static string ValidateSourceUrl(string url)
     {
       if (string.IsNullOrEmpty(url))

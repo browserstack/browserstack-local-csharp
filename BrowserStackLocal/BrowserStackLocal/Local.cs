@@ -11,7 +11,7 @@ namespace BrowserStack
     private string folder = "";
     private string accessKey = "";
     private string customLogPath = "";
-    private string argumentString = "";
+    private List<string> argumentList = new List<string>();
     private string customBinaryPath = "";
     private string bindingVersion = "";
     private string userAgent = "browserstack-local-csharp";
@@ -40,10 +40,25 @@ namespace BrowserStack
       new KeyValuePair<string, string>("onlyAutomate", "-onlyAutomate"),
     };
 
+    // An option key is forwarded to the binary as a flag, so it must look like one.
+    // Anything carrying whitespace (or other argument-delimiter characters) is rejected
+    // rather than being smuggled into the child process argv. A leading "-"/"--" is
+    // allowed because the README documents keys in that form (e.g. "-pac-file").
+    private static readonly Regex optionKeyPattern = new Regex(@"^-{0,2}[A-Za-z0-9][A-Za-z0-9._-]*$");
+
     public bool isRunning()
     {
       if (tunnel == null) return false;
       return tunnel.IsConnected();
+    }
+
+    // Appends one flag/value pair as DISCRETE argv elements. Keeping them separate is
+    // what stops an embedded space in a value from being re-tokenised into extra flags.
+    private void addArgument(string flag, string value)
+    {
+      // "hosts" maps to an empty flag name: its value is positional, so emit no flag.
+      if (!string.IsNullOrEmpty(flag)) argumentList.Add(flag);
+      if (value != null) argumentList.Add(value);
     }
 
     private void addArgs(string key, string value)
@@ -92,7 +107,7 @@ namespace BrowserStack
         result = valueCommands.Find(pair => pair.Key == key);
         if (!result.Equals(emptyStringPair))
         {
-          argumentString += result.Value + " " + value + " ";
+          addArgument(result.Value, value);
           return;
         }
 
@@ -101,18 +116,29 @@ namespace BrowserStack
         {
           if (value.Trim().ToLower() == "true")
           {
-            argumentString += result.Value + " ";
+            addArgument(result.Value, null);
             return;
           }
         }
 
+        // Unrecognised keys are still forwarded: the binding deliberately passes through
+        // BrowserStackLocal modifiers it does not know about (see README, "for the full
+        // list of modifiers"), and documented options such as localProxyHost and pac-file
+        // arrive here. Validate the key's shape instead of rejecting it outright.
+        if (!optionKeyPattern.IsMatch(key))
+        {
+          throw new ArgumentException(
+            "Invalid BrowserStackLocal option key: \"" + key + "\". Option keys may contain " +
+            "only letters, digits, '.', '_' and '-'.");
+        }
+
         if (value.Trim().ToLower() == "true")
         {
-          argumentString += "-" + key + " ";
+          addArgument("-" + key, null);
         }
         else
         {
-          argumentString += "-" + key + " " + value + " ";
+          addArgument("-" + key, value);
         }
       }
     }
@@ -229,17 +255,23 @@ namespace BrowserStack
           throw new Exception("BROWSERSTACK_ACCESS_KEY cannot be empty. " +
             "Specify one by adding key to options or adding to the environment variable BROWSERSTACK_ACCESS_KEY.");
         }
-        Regex.Replace(this.accessKey, @"\s+", "");
       }
+
+      // Strip whitespace from the access key on BOTH paths (caller-supplied and env var).
+      // The result must be assigned back - strings are immutable, so the previous call
+      // discarded its own output and normalised nothing.
+      accessKey = Regex.Replace(accessKey.Trim(), @"\s+", "");
 
       if (customLogPath == null || customLogPath.Trim().Length == 0)
       {
         customLogPath = Path.Combine(BrowserStackTunnel.basePaths[1], "local.log");
       }
 
-      argumentString += "-logFile \"" + customLogPath + "\" ";
-      argumentString += "--source \"c-sharp:" + bindingVersion + "\" ";
-      tunnel.addBinaryArguments(argumentString);
+      argumentList.Add("-logFile");
+      argumentList.Add(customLogPath);
+      argumentList.Add("--source");
+      argumentList.Add("c-sharp:" + bindingVersion);
+      tunnel.addBinaryArguments(argumentList);
       tunnel.SetProxy(proxyHost, proxyPort);
 
       DownloadVerifyAndRunBinary();

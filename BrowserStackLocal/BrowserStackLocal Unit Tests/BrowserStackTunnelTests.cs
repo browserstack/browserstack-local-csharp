@@ -5,6 +5,7 @@ using TestMethod = NUnit.Framework.TestAttribute;
 
 using NUnit.Framework;
 using BrowserStack;
+using System.Collections.Generic;
 using System.Text;
 using System.IO;
 
@@ -91,15 +92,15 @@ namespace BrowserStack_Unit_Tests
     public void TestBinaryArguments()
     {
       tunnel = new TunnelClass();
-      tunnel.addBinaryArguments("dummyArguments");
-      Assert.AreEqual(tunnel.getBinaryArguments(), "dummyArguments");
+      tunnel.addBinaryArguments(new List<string> { "-dummyFlag", "dummyValue" });
+      CollectionAssert.AreEqual(new List<string> { "-dummyFlag", "dummyValue" }, tunnel.getBinaryArguments());
     }
     [TestMethod]
     public void TestBinaryArgumentsAreEmptyOnNull()
     {
       tunnel = new TunnelClass();
       tunnel.addBinaryArguments(null);
-      Assert.AreEqual(tunnel.getBinaryArguments(), "");
+      Assert.IsEmpty(tunnel.getBinaryArguments());
     }
 
 
@@ -141,7 +142,7 @@ namespace BrowserStack_Unit_Tests
       {
         return binaryAbsolute;
       }
-      public string getBinaryArguments()
+      public List<string> getBinaryArguments()
       {
         return binaryArguments;
       }

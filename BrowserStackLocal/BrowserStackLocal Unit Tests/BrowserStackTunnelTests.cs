@@ -133,6 +133,13 @@ namespace BrowserStack_Unit_Tests
     public class TunnelClass : BrowserStackTunnel
     {
       public TunnelClass() : base("test-user-agent") {}
+      // Stub the network boundary so these binary-path/fallback unit tests exercise
+      // the real path-resolution logic without making a live HTTP call to the
+      // endpoint API (which addBinaryPath triggers on first invocation).
+      protected override string fetchSourceUrl(string accessKey)
+      {
+        return null;
+      }
       public StringBuilder getOutputBuilder()
       {
         return output;

@@ -184,7 +184,7 @@ namespace BrowserStack
       }
     }
 
-    private string fetchSourceUrl(string accessKey)
+    protected virtual string fetchSourceUrl(string accessKey)
     {
       var url = "https://local.browserstack.com/binary/api/v1/endpoint";
 

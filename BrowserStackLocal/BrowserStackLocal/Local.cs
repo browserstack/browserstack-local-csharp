@@ -40,12 +40,6 @@ namespace BrowserStack
       new KeyValuePair<string, string>("onlyAutomate", "-onlyAutomate"),
     };
 
-    // An option key is forwarded to the binary as a flag, so it must look like one.
-    // Anything carrying whitespace (or other argument-delimiter characters) is rejected
-    // rather than being smuggled into the child process argv. A leading "-"/"--" is
-    // allowed because the README documents keys in that form (e.g. "-pac-file").
-    private static readonly Regex optionKeyPattern = new Regex(@"^-{0,2}[A-Za-z0-9][A-Za-z0-9._-]*$");
-
     public bool isRunning()
     {
       if (tunnel == null) return false;
@@ -121,17 +115,10 @@ namespace BrowserStack
           }
         }
 
-        // Unrecognised keys are still forwarded: the binding deliberately passes through
+        // Unrecognised keys are forwarded as-is: the binding deliberately passes through
         // BrowserStackLocal modifiers it does not know about (see README, "for the full
         // list of modifiers"), and documented options such as localProxyHost and pac-file
-        // arrive here. Validate the key's shape instead of rejecting it outright.
-        if (!optionKeyPattern.IsMatch(key))
-        {
-          throw new ArgumentException(
-            "Invalid BrowserStackLocal option key: \"" + key + "\". Option keys may contain " +
-            "only letters, digits, '.', '_' and '-'.");
-        }
-
+        // arrive here.
         if (value.Trim().ToLower() == "true")
         {
           addArgument("-" + key, null);

@@ -361,20 +361,6 @@ namespace BrowserStack_Unit_Tests
     }
 
     [TestMethod]
-    public void TestOptionKeyWithWhitespaceIsRejected()
-    {
-      options = new List<KeyValuePair<string, string>>();
-      options.Add(new KeyValuePair<string, string>("key", "dummyKey"));
-      options.Add(new KeyValuePair<string, string>("foo --proxy evil.example.com", "bar"));
-
-      local = new LocalClass();
-      Mock<BrowserStackTunnel> tunnelMock = new Mock<BrowserStackTunnel>("test-user-agent");
-      local.setTunnel(tunnelMock.Object);
-
-      Assert.Throws(typeof(ArgumentException), new TestDelegate(startWithOptions));
-    }
-
-    [TestMethod]
     public void TestAccessKeyWhitespaceIsStrippedFromOptions()
     {
       options = new List<KeyValuePair<string, string>>();

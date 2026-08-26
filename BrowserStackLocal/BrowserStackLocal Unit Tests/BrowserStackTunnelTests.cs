@@ -5,6 +5,7 @@ using TestMethod = NUnit.Framework.TestAttribute;
 
 using NUnit.Framework;
 using BrowserStack;
+using System.Collections.Generic;
 using System.Text;
 using System.IO;
 
@@ -91,15 +92,15 @@ namespace BrowserStack_Unit_Tests
     public void TestBinaryArguments()
     {
       tunnel = new TunnelClass();
-      tunnel.addBinaryArguments("dummyArguments");
-      Assert.AreEqual(tunnel.getBinaryArguments(), "dummyArguments");
+      tunnel.addBinaryArguments(new List<string> { "-dummyFlag", "dummyValue" });
+      CollectionAssert.AreEqual(new List<string> { "-dummyFlag", "dummyValue" }, tunnel.getBinaryArguments());
     }
     [TestMethod]
     public void TestBinaryArgumentsAreEmptyOnNull()
     {
       tunnel = new TunnelClass();
       tunnel.addBinaryArguments(null);
-      Assert.AreEqual(tunnel.getBinaryArguments(), "");
+      Assert.IsEmpty(tunnel.getBinaryArguments());
     }
 
 
@@ -130,6 +131,64 @@ namespace BrowserStack_Unit_Tests
     {
       tunnel.fallbackPaths();
     }
+
+    // Regression for the chmod shell-metacharacter injection (F-001): binaryAbsolute must
+    // reach chmod as a single argument, never interpolated into a shell command line. On
+    // pre-fix code (`bash -c "chmod 0755 <path>"`) the payload below runs `touch <marker>`
+    // and never chmods the real file, so BOTH asserts fail; the fix (`/bin/chmod` +
+    // ArgumentList) creates no marker and chmods the real path. Unix-only: on Windows
+    // modifyBinaryPermission takes the ACL branch, not chmod.
+    [TestMethod]
+    public void TestModifyBinaryPermissionDoesNotInterpretShellMetacharacters()
+    {
+      if (os.Platform.ToString() != "Unix")
+      {
+        Assert.Ignore("Unix-only: Windows takes the ACL branch in modifyBinaryPermission, not chmod");
+        return;
+      }
+
+      string prevCwd = Directory.GetCurrentDirectory();
+      // Space-free working dir so the injected `touch pwned` (if it runs) lands here deterministically.
+      string work = Path.Combine(Path.GetTempPath(), "bsloc" + Guid.NewGuid().ToString("N"));
+      Directory.CreateDirectory(work);
+      Directory.SetCurrentDirectory(work);
+      try
+      {
+        // Filename carries a space AND a shell-injection payload. A filename cannot contain '/',
+        // so the injected command targets the (deterministic) CWD, not an absolute path.
+        string binaryPath = Path.Combine(work, "bs local; touch pwned; #");
+        File.WriteAllText(binaryPath, "#!/bin/sh\n"); // default perms ~0644 (not executable)
+
+        tunnel = new TunnelClass();
+        ((TunnelClass)tunnel).setBinaryAbsolute(binaryPath);
+        tunnel.modifyBinaryPermission();
+
+        Assert.IsFalse(File.Exists(Path.Combine(work, "pwned")),
+          "shell metacharacters in binaryAbsolute were interpreted - OS command injection");
+        Assert.IsTrue(IsExecutable(binaryPath),
+          "chmod 0755 was not applied to the real binary path (the path was mangled by the shell)");
+      }
+      finally
+      {
+        Directory.SetCurrentDirectory(prevCwd);
+        try { Directory.Delete(work, true); } catch { }
+      }
+    }
+
+    // Returns true iff `path` has the execute bit set. Uses sh's `$0` positional so the
+    // path (which contains a space + metacharacters) is passed safely, not re-parsed.
+    private static bool IsExecutable(string path)
+    {
+      var psi = new System.Diagnostics.ProcessStartInfo("/bin/sh") { UseShellExecute = false };
+      psi.ArgumentList.Add("-c");
+      psi.ArgumentList.Add("test -x \"$0\"");
+      psi.ArgumentList.Add(path);
+      using (var p = System.Diagnostics.Process.Start(psi))
+      {
+        p.WaitForExit();
+        return p.ExitCode == 0;
+      }
+    }
     public class TunnelClass : BrowserStackTunnel
     {
       public TunnelClass() : base("test-user-agent") {}
@@ -141,9 +200,13 @@ namespace BrowserStack_Unit_Tests
       {
         return binaryAbsolute;
       }
-      public string getBinaryArguments()
+      public List<string> getBinaryArguments()
       {
         return binaryArguments;
+      }
+      public void setBinaryAbsolute(string path)
+      {
+        binaryAbsolute = path;
       }
     }
   }

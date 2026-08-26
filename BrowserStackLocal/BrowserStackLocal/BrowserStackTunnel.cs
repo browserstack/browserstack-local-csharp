@@ -45,7 +45,7 @@ namespace BrowserStack
 
     public int basePathsIndex = -1;
     protected string binaryAbsolute = "";
-    protected string binaryArguments = "";
+    protected List<string> binaryArguments = new List<string>();
 
     protected StringBuilder output;
     public LocalState localState;
@@ -129,13 +129,9 @@ namespace BrowserStack
       this.binaryAbsolute = binaryAbsolute;
     }
 
-    public virtual void addBinaryArguments(string binaryArguments)
+    public virtual void addBinaryArguments(List<string> binaryArguments)
     {
-      if (binaryArguments == null)
-      {
-        binaryArguments = "";
-      }
-      this.binaryArguments = binaryArguments;
+      this.binaryArguments = binaryArguments ?? new List<string>();
     }
 
     public BrowserStackTunnel(string userAgentParam)
@@ -165,7 +161,17 @@ namespace BrowserStack
       {
         try
         {
-          using (Process proc = Process.Start("/bin/bash", $"-c \"chmod 0755 {this.binaryAbsolute}\""))
+          // Invoke chmod directly rather than through "bash -c": binaryAbsolute is
+          // caller-controlled (the "binarypath" option), so interpolating it into a
+          // shell command line let it break out into arbitrary shell syntax.
+          ProcessStartInfo chmodStartInfo = new ProcessStartInfo("/bin/chmod")
+          {
+            UseShellExecute = false,
+            CreateNoWindow = true
+          };
+          chmodStartInfo.ArgumentList.Add("0755");
+          chmodStartInfo.ArgumentList.Add(this.binaryAbsolute);
+          using (Process proc = Process.Start(chmodStartInfo))
           {
             proc.WaitForExit();
           }
@@ -260,15 +266,18 @@ namespace BrowserStack
 
     public virtual void Run(string accessKey, string folder, string logFilePath, string processType)
     {
-      string arguments = "-d " + processType + " ";
+      List<string> arguments = new List<string> { "-d", processType };
       if (folder != null && folder.Trim().Length != 0)
       {
-        arguments += "-f " + accessKey + " " + folder + " " + binaryArguments;
+        arguments.Add("-f");
+        arguments.Add(accessKey);
+        arguments.Add(folder);
       }
       else
       {
-        arguments += accessKey + " " + binaryArguments;
+        arguments.Add(accessKey);
       }
+      arguments.AddRange(binaryArguments);
       if (!File.Exists(binaryAbsolute))
       {
         downloadBinary();
@@ -286,12 +295,13 @@ namespace BrowserStack
       RunProcess(arguments, processType);
     }
 
-    private void RunProcess(string arguments, string processType)
+    private void RunProcess(List<string> arguments, string processType)
     {
+      // ArgumentList passes each element to the child process as its own argv entry, so a
+      // value containing whitespace can never shift argument boundaries into extra flags.
       ProcessStartInfo processStartInfo = new ProcessStartInfo()
       {
         FileName = binaryAbsolute,
-        Arguments = arguments,
         CreateNoWindow = true,
         WindowStyle = ProcessWindowStyle.Hidden,
         RedirectStandardOutput = true,
@@ -299,6 +309,10 @@ namespace BrowserStack
         RedirectStandardInput = true,
         UseShellExecute = false
       };
+      foreach (string argument in arguments)
+      {
+        processStartInfo.ArgumentList.Add(argument);
+      }
 
       process = new Process();
       process.StartInfo = processStartInfo;

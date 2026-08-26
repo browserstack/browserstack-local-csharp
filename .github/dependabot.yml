@@ -1,0 +1,12 @@
+# Keeps the commit-SHA pins in .github/workflows/ maintained.
+# Pinning actions to an immutable SHA (rather than a mutable tag) is what stops a
+# compromised or re-pointed action tag from executing in the release job; Dependabot
+# is what stops those pins from going stale.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "ci"

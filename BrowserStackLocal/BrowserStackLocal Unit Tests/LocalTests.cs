@@ -110,7 +110,7 @@ namespace BrowserStack_Unit_Tests
       tunnelMock.Setup(mock => mock.Run("dummyKey", "", logAbsolute, "start"));
       local.setTunnel(tunnelMock.Object);
       local.start(options);
-      tunnelMock.Verify(mock => mock.addBinaryPath("dummyPath", "", It.IsAny<bool>(), It.IsAny<Exception>()), Times.Once);
+      tunnelMock.Verify(mock => mock.addBinaryPath("dummyPath", "dummyKey", It.IsAny<bool>(), It.IsAny<Exception>()), Times.Once);
       tunnelMock.Verify(mock => mock.addBinaryArguments(It.Is<List<string>>(a =>
         InOrder(a, "-logFile", logAbsolute))), Times.Once());
       tunnelMock.Verify(mock => mock.Run("dummyKey", "", logAbsolute, "start"), Times.Once());
@@ -133,7 +133,7 @@ namespace BrowserStack_Unit_Tests
       tunnelMock.Setup(mock => mock.Run("dummyKey", "", logAbsolute, "start"));
       local.setTunnel(tunnelMock.Object);
       local.start(options);
-      tunnelMock.Verify(mock => mock.addBinaryPath("", "", It.IsAny<bool>(), It.IsAny<Exception>()), Times.Once);
+      tunnelMock.Verify(mock => mock.addBinaryPath("", "dummyKey", It.IsAny<bool>(), It.IsAny<Exception>()), Times.Once);
       tunnelMock.Verify(mock => mock.addBinaryArguments(It.Is<List<string>>(a =>
         InOrder(a, "-vvv", "-force", "-forcelocal", "-forceproxy", "-onlyAutomate"))), Times.Once());
       tunnelMock.Verify(mock => mock.Run("dummyKey", "", logAbsolute, "start"), Times.Once());
@@ -157,7 +157,7 @@ namespace BrowserStack_Unit_Tests
       tunnelMock.Setup(mock =>mock.Run("dummyKey", "", logAbsolute, "start"));
       local.setTunnel(tunnelMock.Object);
       local.start(options);
-      tunnelMock.Verify(mock => mock.addBinaryPath("", "", It.IsAny<bool>(), It.IsAny<Exception>()), Times.Once);
+      tunnelMock.Verify(mock => mock.addBinaryPath("", "dummyKey", It.IsAny<bool>(), It.IsAny<Exception>()), Times.Once);
       tunnelMock.Verify(mock => mock.addBinaryArguments(It.Is<List<string>>(a =>
         InOrder(a, "-localIdentifier", "dummyIdentifier", "dummyHost", "-proxyHost", "dummyHost",
                    "-proxyPort", "dummyPort", "-proxyUser", "dummyUser", "-proxyPass", "dummyPass"))
@@ -181,7 +181,7 @@ namespace BrowserStack_Unit_Tests
       tunnelMock.Setup(mock => mock.Run("dummyKey", "", logAbsolute, "start"));
       local.setTunnel(tunnelMock.Object);
       local.start(options);
-      tunnelMock.Verify(mock => mock.addBinaryPath("", "", It.IsAny<bool>(), It.IsAny<Exception>()), Times.Once);
+      tunnelMock.Verify(mock => mock.addBinaryPath("", "dummyKey", It.IsAny<bool>(), It.IsAny<Exception>()), Times.Once);
       tunnelMock.Verify(mock => mock.addBinaryArguments(It.Is<List<string>>(a =>
         InOrder(a, "-customBoolKey1", "-customBoolKey2", "-customKey1", "customValue1",
                    "-customKey2", "customValue2"))
@@ -207,7 +207,7 @@ namespace BrowserStack_Unit_Tests
       });
       local.setTunnel(tunnelMock.Object);
       local.start(options);
-      tunnelMock.Verify(mock => mock.addBinaryPath("", "", It.IsAny<bool>(), It.IsAny<Exception>()), Times.Once);
+      tunnelMock.Verify(mock => mock.addBinaryPath("", "dummyKey", It.IsAny<bool>(), It.IsAny<Exception>()), Times.Once);
       tunnelMock.Verify(mock => mock.addBinaryArguments(It.Is<List<string>>(a =>
         InOrder(a, "-logFile", logAbsolute))), Times.Once());
       tunnelMock.Verify(mock => mock.Run("dummyKey", "", logAbsolute, "start"), Times.Exactly(2));
@@ -227,7 +227,7 @@ namespace BrowserStack_Unit_Tests
       local.setTunnel(tunnelMock.Object);
       local.start(options);
       local.stop();
-      tunnelMock.Verify(mock => mock.addBinaryPath("", "", It.IsAny<bool>(), It.IsAny<Exception>()), Times.Once);
+      tunnelMock.Verify(mock => mock.addBinaryPath("", "dummyKey", It.IsAny<bool>(), It.IsAny<Exception>()), Times.Once);
       tunnelMock.Verify(mock => mock.addBinaryArguments(It.Is<List<string>>(a =>
         InOrder(a, "-logFile", logAbsolute))), Times.Once());
       tunnelMock.Verify(mock => mock.Run("dummyKey", "", logAbsolute, "start"), Times.Once());

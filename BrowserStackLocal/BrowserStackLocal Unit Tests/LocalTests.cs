@@ -57,7 +57,8 @@ namespace BrowserStack_Unit_Tests
       local.setTunnel(tunnelMock.Object);
       Assert.DoesNotThrow(new TestDelegate(startWithOptions),
         "BROWSERSTACK_ACCESS_KEY cannot be empty. Specify one by adding key to options or adding to the environment variable BROWSERSTACK_ACCESS_KEY.");
-      tunnelMock.Verify(mock => mock.addBinaryArguments(It.IsRegex("-logFile \"" + logAbsolute + "\" " + "--source \"c-sharp:.*")), Times.Once());
+      tunnelMock.Verify(mock => mock.addBinaryArguments(It.Is<List<string>>(a =>
+        InOrder(a, "-logFile", logAbsolute, "--source") && StartsWithAny(a, "c-sharp:"))), Times.Once());
       tunnelMock.Verify(mock => mock.Run("dummyKey", "", logAbsolute, "start"), Times.Once());
       local.stop();
     }
@@ -73,7 +74,8 @@ namespace BrowserStack_Unit_Tests
       local.setTunnel(tunnelMock.Object);
       Assert.DoesNotThrow(new TestDelegate(startWithOptions),
         "BROWSERSTACK_ACCESS_KEY cannot be empty. Specify one by adding key to options or adding to the environment variable BROWSERSTACK_ACCESS_KEY.");
-      tunnelMock.Verify(mock => mock.addBinaryArguments(It.IsRegex("-logFile \"" + logAbsolute + "\" .*")), Times.Once());
+      tunnelMock.Verify(mock => mock.addBinaryArguments(It.Is<List<string>>(a =>
+        InOrder(a, "-logFile", logAbsolute))), Times.Once());
       tunnelMock.Verify(mock => mock.Run("envDummyKey", "", logAbsolute, "start"), Times.Once());
       local.stop();
     }
@@ -90,7 +92,8 @@ namespace BrowserStack_Unit_Tests
       tunnelMock.Setup(mock => mock.Run("dummyKey", "dummyFolderPath", logAbsolute, "start"));
       local.setTunnel(tunnelMock.Object);
       local.start(options);
-      tunnelMock.Verify(mock => mock.addBinaryArguments(It.IsRegex("-logFile \"" + logAbsolute + "\" .*")), Times.Once());
+      tunnelMock.Verify(mock => mock.addBinaryArguments(It.Is<List<string>>(a =>
+        InOrder(a, "-logFile", logAbsolute))), Times.Once());
       tunnelMock.Verify(mock => mock.Run("dummyKey", "dummyFolderPath", logAbsolute, "start"), Times.Once());
       local.stop();
     }
@@ -108,7 +111,8 @@ namespace BrowserStack_Unit_Tests
       local.setTunnel(tunnelMock.Object);
       local.start(options);
       tunnelMock.Verify(mock => mock.addBinaryPath("dummyPath", "", It.IsAny<bool>(), It.IsAny<Exception>()), Times.Once);
-      tunnelMock.Verify(mock => mock.addBinaryArguments(It.IsRegex("-logFile \"" + logAbsolute + "\" .*")), Times.Once());
+      tunnelMock.Verify(mock => mock.addBinaryArguments(It.Is<List<string>>(a =>
+        InOrder(a, "-logFile", logAbsolute))), Times.Once());
       tunnelMock.Verify(mock => mock.Run("dummyKey", "", logAbsolute, "start"), Times.Once());
       local.stop();
     }
@@ -130,7 +134,8 @@ namespace BrowserStack_Unit_Tests
       local.setTunnel(tunnelMock.Object);
       local.start(options);
       tunnelMock.Verify(mock => mock.addBinaryPath("", "", It.IsAny<bool>(), It.IsAny<Exception>()), Times.Once);
-      tunnelMock.Verify(mock => mock.addBinaryArguments(It.IsRegex("-vvv.*-force.*-forcelocal.*-forceproxy.*-onlyAutomate.*")), Times.Once());
+      tunnelMock.Verify(mock => mock.addBinaryArguments(It.Is<List<string>>(a =>
+        InOrder(a, "-vvv", "-force", "-forcelocal", "-forceproxy", "-onlyAutomate"))), Times.Once());
       tunnelMock.Verify(mock => mock.Run("dummyKey", "", logAbsolute, "start"), Times.Once());
       local.stop();
     }
@@ -153,8 +158,9 @@ namespace BrowserStack_Unit_Tests
       local.setTunnel(tunnelMock.Object);
       local.start(options);
       tunnelMock.Verify(mock => mock.addBinaryPath("", "", It.IsAny<bool>(), It.IsAny<Exception>()), Times.Once);
-      tunnelMock.Verify(mock => mock.addBinaryArguments(
-        It.IsRegex("-localIdentifier.*dummyIdentifier.*dummyHost.*-proxyHost.*dummyHost.*-proxyPort.*dummyPort.*-proxyUser.*dummyUser.*-proxyPass.*dummyPass.*")
+      tunnelMock.Verify(mock => mock.addBinaryArguments(It.Is<List<string>>(a =>
+        InOrder(a, "-localIdentifier", "dummyIdentifier", "dummyHost", "-proxyHost", "dummyHost",
+                   "-proxyPort", "dummyPort", "-proxyUser", "dummyUser", "-proxyPass", "dummyPass"))
         ), Times.Once());
       tunnelMock.Verify(mock => mock.Run("dummyKey", "", logAbsolute, "start"), Times.Once());
       local.stop();
@@ -176,8 +182,9 @@ namespace BrowserStack_Unit_Tests
       local.setTunnel(tunnelMock.Object);
       local.start(options);
       tunnelMock.Verify(mock => mock.addBinaryPath("", "", It.IsAny<bool>(), It.IsAny<Exception>()), Times.Once);
-      tunnelMock.Verify(mock => mock.addBinaryArguments(
-        It.IsRegex("-customBoolKey1.*-customBoolKey2.*-customKey1.*customValue1.*-customKey2.*customValue2.*")
+      tunnelMock.Verify(mock => mock.addBinaryArguments(It.Is<List<string>>(a =>
+        InOrder(a, "-customBoolKey1", "-customBoolKey2", "-customKey1", "customValue1",
+                   "-customKey2", "customValue2"))
         ), Times.Once());
       tunnelMock.Verify(mock => mock.Run("dummyKey", "", logAbsolute, "start"), Times.Once());
       local.stop();
@@ -201,7 +208,8 @@ namespace BrowserStack_Unit_Tests
       local.setTunnel(tunnelMock.Object);
       local.start(options);
       tunnelMock.Verify(mock => mock.addBinaryPath("", "", It.IsAny<bool>(), It.IsAny<Exception>()), Times.Once);
-      tunnelMock.Verify(mock => mock.addBinaryArguments(It.IsRegex("-logFile \"" + logAbsolute + "\" .*")), Times.Once());
+      tunnelMock.Verify(mock => mock.addBinaryArguments(It.Is<List<string>>(a =>
+        InOrder(a, "-logFile", logAbsolute))), Times.Once());
       tunnelMock.Verify(mock => mock.Run("dummyKey", "", logAbsolute, "start"), Times.Exactly(2));
       tunnelMock.Verify(mock => mock.fallbackPaths(), Times.Once());
       local.stop();
@@ -220,7 +228,8 @@ namespace BrowserStack_Unit_Tests
       local.start(options);
       local.stop();
       tunnelMock.Verify(mock => mock.addBinaryPath("", "", It.IsAny<bool>(), It.IsAny<Exception>()), Times.Once);
-      tunnelMock.Verify(mock => mock.addBinaryArguments(It.IsRegex("-logFile \"" + logAbsolute + "\" .*")), Times.Once());
+      tunnelMock.Verify(mock => mock.addBinaryArguments(It.Is<List<string>>(a =>
+        InOrder(a, "-logFile", logAbsolute))), Times.Once());
       tunnelMock.Verify(mock => mock.Run("dummyKey", "", logAbsolute, "start"), Times.Once());
     }
 
@@ -270,6 +279,153 @@ namespace BrowserStack_Unit_Tests
       local.setTunnel(tunnelMock.Object);
       local.start(options);
       tunnelMock.Verify(mock => mock.SetProxy("proxy.example.com", 0), Times.Once);
+      local.stop();
+    }
+
+    // ---- argv helpers -------------------------------------------------------
+    // Arguments are now discrete argv elements rather than one concatenated string,
+    // so assertions match elements in order instead of matching a regex.
+    private static bool InOrder(List<string> actual, params string[] expected)
+    {
+      int idx = 0;
+      foreach (string e in expected)
+      {
+        idx = actual.IndexOf(e, idx);
+        if (idx < 0) return false;
+        idx++;
+      }
+      return true;
+    }
+
+    private static bool StartsWithAny(List<string> actual, string prefix)
+    {
+      return actual.Exists(a => a != null && a.StartsWith(prefix));
+    }
+
+    // ---- regression tests: CWE-88 argument injection ------------------------
+    // Each of these fails on the pre-fix code, where every value was concatenated
+    // into one string that Process.Start then re-tokenised on whitespace.
+
+    [TestMethod]
+    public void TestOptionValueWithSpacesStaysOneArgument()
+    {
+      options = new List<KeyValuePair<string, string>>();
+      options.Add(new KeyValuePair<string, string>("key", "dummyKey"));
+      options.Add(new KeyValuePair<string, string>("proxyPass", "p@ss --proxy evil.example.com"));
+
+      local = new LocalClass();
+      Mock<BrowserStackTunnel> tunnelMock = new Mock<BrowserStackTunnel>("test-user-agent");
+      local.setTunnel(tunnelMock.Object);
+      local.start(options);
+
+      tunnelMock.Verify(mock => mock.addBinaryArguments(It.Is<List<string>>(a =>
+        InOrder(a, "-proxyPass", "p@ss --proxy evil.example.com")
+        && !a.Contains("--proxy"))), Times.Once());
+      local.stop();
+    }
+
+    [TestMethod]
+    public void TestUnknownOptionValueWithSpacesStaysOneArgument()
+    {
+      options = new List<KeyValuePair<string, string>>();
+      options.Add(new KeyValuePair<string, string>("key", "dummyKey"));
+      options.Add(new KeyValuePair<string, string>("customKey", "legit --config /tmp/attacker.cfg"));
+
+      local = new LocalClass();
+      Mock<BrowserStackTunnel> tunnelMock = new Mock<BrowserStackTunnel>("test-user-agent");
+      local.setTunnel(tunnelMock.Object);
+      local.start(options);
+
+      tunnelMock.Verify(mock => mock.addBinaryArguments(It.Is<List<string>>(a =>
+        InOrder(a, "-customKey", "legit --config /tmp/attacker.cfg")
+        && !a.Contains("--config"))), Times.Once());
+      local.stop();
+    }
+
+    [TestMethod]
+    public void TestLogFilePathWithQuoteStaysOneArgument()
+    {
+      options = new List<KeyValuePair<string, string>>();
+      options.Add(new KeyValuePair<string, string>("key", "dummyKey"));
+      options.Add(new KeyValuePair<string, string>("logfile", "/tmp/x\" --proxy evil.example.com \""));
+
+      local = new LocalClass();
+      Mock<BrowserStackTunnel> tunnelMock = new Mock<BrowserStackTunnel>("test-user-agent");
+      local.setTunnel(tunnelMock.Object);
+      local.start(options);
+
+      tunnelMock.Verify(mock => mock.addBinaryArguments(It.Is<List<string>>(a =>
+        InOrder(a, "-logFile", "/tmp/x\" --proxy evil.example.com \"")
+        && !a.Contains("--proxy"))), Times.Once());
+      local.stop();
+    }
+
+    [TestMethod]
+    public void TestAccessKeyWhitespaceIsStrippedFromOptions()
+    {
+      options = new List<KeyValuePair<string, string>>();
+      options.Add(new KeyValuePair<string, string>("key", " dummy Key --proxy evil.example.com "));
+
+      local = new LocalClass();
+      Mock<BrowserStackTunnel> tunnelMock = new Mock<BrowserStackTunnel>("test-user-agent");
+      local.setTunnel(tunnelMock.Object);
+      local.start(options);
+
+      // Whitespace removed, so no "--proxy" token can split out of the key.
+      tunnelMock.Verify(mock => mock.Run("dummyKey--proxyevil.example.com", "", logAbsolute, "start"),
+        Times.Once());
+      local.stop();
+    }
+
+    [TestMethod]
+    public void TestAccessKeyWhitespaceIsStrippedFromEnvironmentVariable()
+    {
+      Environment.SetEnvironmentVariable("BROWSERSTACK_ACCESS_KEY", "env Dummy\tKey");
+      options = new List<KeyValuePair<string, string>>();
+
+      local = new LocalClass();
+      Mock<BrowserStackTunnel> tunnelMock = new Mock<BrowserStackTunnel>("test-user-agent");
+      local.setTunnel(tunnelMock.Object);
+      local.start(options);
+
+      tunnelMock.Verify(mock => mock.Run("envDummyKey", "", logAbsolute, "start"), Times.Once());
+      local.stop();
+    }
+
+    [TestMethod]
+    public void TestFolderPathWithSpacesIsPreserved()
+    {
+      options = new List<KeyValuePair<string, string>>();
+      options.Add(new KeyValuePair<string, string>("key", "dummyKey"));
+      options.Add(new KeyValuePair<string, string>("f", "/my/awesome folder"));
+
+      local = new LocalClass();
+      Mock<BrowserStackTunnel> tunnelMock = new Mock<BrowserStackTunnel>("test-user-agent");
+      local.setTunnel(tunnelMock.Object);
+      local.start(options);
+
+      tunnelMock.Verify(mock => mock.Run("dummyKey", "/my/awesome folder", logAbsolute, "start"),
+        Times.Once());
+      local.stop();
+    }
+
+    [TestMethod]
+    public void TestDocumentedPassThroughOptionsStillWork()
+    {
+      options = new List<KeyValuePair<string, string>>();
+      options.Add(new KeyValuePair<string, string>("key", "dummyKey"));
+      options.Add(new KeyValuePair<string, string>("localProxyHost", "127.0.0.1"));
+      options.Add(new KeyValuePair<string, string>("localProxyPort", "8000"));
+      options.Add(new KeyValuePair<string, string>("-pac-file", "/tmp/my proxy.pac"));
+
+      local = new LocalClass();
+      Mock<BrowserStackTunnel> tunnelMock = new Mock<BrowserStackTunnel>("test-user-agent");
+      local.setTunnel(tunnelMock.Object);
+      local.start(options);
+
+      tunnelMock.Verify(mock => mock.addBinaryArguments(It.Is<List<string>>(a =>
+        InOrder(a, "-localProxyHost", "127.0.0.1", "-localProxyPort", "8000",
+                   "--pac-file", "/tmp/my proxy.pac"))), Times.Once());
       local.stop();
     }
 

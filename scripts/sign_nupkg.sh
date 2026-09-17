@@ -37,7 +37,7 @@ for NUPKG in BrowserStackLocal/BrowserStackLocal/bin/Release/*.nupkg; do
         --keystore "projects/browserstack-production/locations/us-east1/keyRings/prod-comodo-win-cert-keyring" \
         --alias "prod-comodo-win-cert-key/cryptoKeyVersions/1" \
         --certfile comodo_signing_cert.crt \
-        --tsaurl http://timestamp.sectigo.com \
+        --tsaurl https://timestamp.sectigo.com \
         "$NUPKG"
     SIGNED_ANY=1
 done

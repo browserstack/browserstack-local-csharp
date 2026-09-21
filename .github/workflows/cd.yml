@@ -17,7 +17,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@c26a08ba26249b81327e26f6ef381897b6a8754d # v1.0.2
     - name: Build BrowserStackLocal

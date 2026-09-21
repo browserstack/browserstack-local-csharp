@@ -8,5 +8,9 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    # Wait 7 days before proposing a bump to a newly published action version,
+    # so a compromised or yanked release is caught upstream before it reaches CI.
+    cooldown:
+      default-days: 7
     commit-message:
       prefix: "ci"

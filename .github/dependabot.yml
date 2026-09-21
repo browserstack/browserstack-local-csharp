@@ -1,0 +1,16 @@
+# Keeps the commit-SHA pins in .github/workflows/ maintained.
+# Pinning actions to an immutable SHA (rather than a mutable tag) is what stops a
+# compromised or re-pointed action tag from executing in the release job; Dependabot
+# is what stops those pins from going stale.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    # Wait 7 days before proposing a bump to a newly published action version,
+    # so a compromised or yanked release is caught upstream before it reaches CI.
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "ci"

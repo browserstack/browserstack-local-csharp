@@ -87,7 +87,7 @@ namespace BrowserStack
     public static string GetBinaryName()
     {
       if (IsWindows()) return "BrowserStackLocal.exe";
-      if (IsDarwin(uname)) return "BrowserStackLocal-darwin-x64";
+      if (IsDarwin(uname)) return IsArm64() ? "BrowserStackLocal-darwin-arm64" : "BrowserStackLocal-darwin-x64";
 
       if (IsLinux(uname))
       {

@@ -111,6 +111,7 @@ namespace BrowserStack_Unit_Tests
       string[] knownBinaries = new[] {
         "BrowserStackLocal.exe",
         "BrowserStackLocal-darwin-x64",
+        "BrowserStackLocal-darwin-arm64",
         "BrowserStackLocal-linux-x64",
         "BrowserStackLocal-linux-ia32",
         "BrowserStackLocal-linux-arm64",

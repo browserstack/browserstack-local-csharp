@@ -3,7 +3,7 @@
     <RootNamespace>BrowserStack</RootNamespace>
     <AssemblyName>BrowserStackLocal</AssemblyName>
     <TargetFramework>net6.0</TargetFramework>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <Title>BrowserStackLocal</Title>
     <Product>BrowserStackLocal</Product>
     <Description>C# Bindings for BrowserStack Local</Description>

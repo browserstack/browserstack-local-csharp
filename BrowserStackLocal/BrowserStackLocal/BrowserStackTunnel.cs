@@ -246,14 +246,42 @@ namespace BrowserStack
 
       Directory.CreateDirectory(binaryDirectory);
 
-      using (var client = new WebClient())
+      // The download endpoint can serve the binary with Content-Encoding: gzip; WebClient
+      // saved those bytes undecoded, so decode it here as the other bindings do.
+      HttpClientHandler handler = new HttpClientHandler
       {
-        client.Headers.Add(HttpRequestHeader.UserAgent, userAgent);
-        if (!string.IsNullOrEmpty(proxyHost) && proxyPort > 0)
+        AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+      };
+      if (!string.IsNullOrEmpty(proxyHost) && proxyPort > 0)
+      {
+        handler.Proxy = new WebProxy(proxyHost, proxyPort);
+        handler.UseProxy = true;
+      }
+
+      try
+      {
+        using (var client = new HttpClient(handler))
         {
-          client.Proxy = new WebProxy(proxyHost, proxyPort);
+          client.DefaultRequestHeaders.Add("User-Agent", userAgent);
+          using (var response = client.GetAsync(sourceUrl + "/" + binaryName, HttpCompletionOption.ResponseHeadersRead).Result)
+          {
+            response.EnsureSuccessStatusCode();
+            using (var body = response.Content.ReadAsStreamAsync().Result)
+            using (var file = File.Create(this.binaryAbsolute))
+            {
+              body.CopyTo(file);
+            }
+          }
         }
-        client.DownloadFile(sourceUrl + "/" + binaryName, this.binaryAbsolute);
+      }
+      catch
+      {
+        // Don't leave a truncated binary behind for the next attempt to find.
+        if (File.Exists(binaryAbsolute))
+        {
+          File.Delete(binaryAbsolute);
+        }
+        throw;
       }
 
       if (!File.Exists(binaryAbsolute))

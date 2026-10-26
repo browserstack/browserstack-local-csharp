@@ -30,6 +30,18 @@ namespace BrowserStack_Unit_Tests
       }
     }
 
+    // The User-Agent carries this version, and local-service uses it to tell a binding
+    // that decodes gzip downloads from older ones. With GenerateAssemblyInfo=false the
+    // csproj version never reached the assembly, so every release reported 0.0.0000.0000.
+    [TestMethod]
+    public void TestBindingVersionComesFromTheAssembly()
+    {
+      Version expected = typeof(Local).Assembly.GetName().Version;
+      Assert.AreNotEqual(new Version(0, 0, 0, 0), expected, "assembly version was not generated from the csproj");
+      Assert.AreEqual(Local.GetVersionString(expected.ToString()),
+                      Local.GetVersionStringFromAssemblyEmbedded("BrowserStackLocal"));
+    }
+
     [TestMethod]
     public void TestThrowsWithNoAccessKey()
     {

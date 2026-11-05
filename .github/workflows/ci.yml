@@ -29,7 +29,7 @@ jobs:
         msbuild BrowserStackLocalIntegrationTests -t:restore -p:Configuration=Release
         msbuild BrowserStackLocalIntegrationTests -t:build -p:Configuration=Release
     - name: Setup .NET Core
-      uses: actions/setup-dotnet@55ec9447dda3d1cf6bd587150f3262f30ee10815 # v3
+      uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
       with:
         dotnet-version: 6.0.x
     - name: Run Integration Tests
